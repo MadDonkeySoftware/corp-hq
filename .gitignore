@@ -307,3 +307,6 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
+
+# NPM things
+package-lock.json
