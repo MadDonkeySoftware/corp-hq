@@ -28,7 +28,11 @@
   * `cd <root>/app/api`
   * `dotnet restore`
 
-## Running the applications
+## Running the applications and dependencies
+* Dependencies
+  * Note: Most, if not all, of the non-external dependences should be controllable through the standard `docker-compose` services. The `up` and `down` commands are usually sufficient but feel free to see `docker-compose` for help.
+  * MongoDB
+    * `docker-compose up -d mongodb`
 * UI Project
   * `cd <root>/app/ui`
   * `npm run dev`
