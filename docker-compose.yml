@@ -1,5 +1,15 @@
 version: '2'
 services:
+    ui:
+        container_name: "corp-hq-ui"
+        build: ./app/ui
+        ports:
+            - 8080:80
+    api:
+        container_name: "corp-hq-api"
+        build: ./app/api
+        ports:
+            - 5000:80
     mongodb:
         container_name: "mongodb"
         image: mongo:latest
