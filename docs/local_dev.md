@@ -29,8 +29,10 @@
   * `dotnet restore`
 
 ## Running the applications and dependencies
+* Notes
+  * Most, if not all, of the non-external dependences should be controllable through the standard `docker-compose` services. The `up` and `down` commands are usually sufficient but feel free to see `docker-compose` for help.
+  * For those that can run `make` on their system the `Makefile` has a few handy shortcuts for common actions taken by devs.
 * Dependencies
-  * Note: Most, if not all, of the non-external dependences should be controllable through the standard `docker-compose` services. The `up` and `down` commands are usually sufficient but feel free to see `docker-compose` for help.
   * MongoDB
     * `docker-compose up -d mongodb`
 * UI Project
