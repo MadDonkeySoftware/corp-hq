@@ -23,3 +23,18 @@ services:
         ports:
             - 27017:27017
         command: mongod --smallfiles --logpath=/dev/null  # --quiet
+    rabbitmq:
+        image: "rabbitmq:management-alpine"
+        hostname: "rabbitmq"
+        environment:
+            RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+            RABBITMQ_DEFAULT_USER: "rabbitmq"
+            RABBITMQ_DEFAULT_PASS: "rabbitmq"
+            RABBITMQ_DEFAULT_VHOST: "/"
+        volumes:
+            - ./docker-compose-files/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+        ports:
+            - 15672:15672
+            - 5672:5672
+        labels:
+            NAME: "rabbitmq1"
