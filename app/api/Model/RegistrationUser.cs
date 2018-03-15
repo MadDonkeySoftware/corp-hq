@@ -10,12 +10,31 @@ namespace Api.Model
     /// </summary>
     public class RegistrationUser
     {
+        private string username;
+
         /// <summary>
         /// Gets or sets the username.
         /// </summary>
         [Required]
         [JsonProperty("username")]
-        public string Username { get; set; }
+        public string Username
+        {
+            get
+            {
+                return this.username.ToUpperInvariant();
+            }
+
+            set
+            {
+                this.username = value;
+                this.DisplayName = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the display name for this user based on the user name.
+        /// </summary>
+        public string DisplayName { get; private set; }
 
         /// <summary>
         /// Gets or sets the password.
