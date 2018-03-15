@@ -312,5 +312,5 @@ selenium-debug.log
 package-lock.json
 
 # Project specific things
-data/
+mongo-data/
 app/api/api.xml
