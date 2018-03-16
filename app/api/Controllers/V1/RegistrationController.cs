@@ -73,34 +73,40 @@ namespace Api.Controllers.V1
         {
             // Do "cheap" validations first.
             // TODO: Figure out how to do validation the .NET way
+            var validationErrors = new List<string>();
             if (user == null)
             {
-                return this.BadRequest(new { message = "Post body cannot be null." });
+                return this.BadRequest(new { messages = new[] { "Post body cannot be null." } });
             }
 
             if (string.IsNullOrWhiteSpace(user.Username))
             {
-                return this.BadRequest(new { message = "Username is a required field." });
+                validationErrors.Add("Username is a required field.");
             }
 
             if (string.IsNullOrWhiteSpace(user.Email))
             {
-                return this.BadRequest(new { message = "Email is a required field." });
+                validationErrors.Add("Email is a required field.");
             }
 
             if (string.IsNullOrWhiteSpace(user.Password))
             {
-                return this.BadRequest(new { message = "Password is a required field." });
+                validationErrors.Add("Password is a required field.");
             }
 
             if (string.IsNullOrWhiteSpace(user.PasswordConfirm))
             {
-                return this.BadRequest(new { message = "Password is a required field." });
+                validationErrors.Add("Password is a required field.");
             }
 
             if (user.Password != user.PasswordConfirm)
             {
-                return this.BadRequest(new { message = "Passwords do not match." });
+                validationErrors.Add("Passwords do not match.");
+            }
+
+            if (validationErrors.Count > 0)
+            {
+                return this.BadRequest(new { messages = validationErrors });
             }
 
             // Perform more expensive validations.
@@ -109,7 +115,7 @@ namespace Api.Controllers.V1
 
             if (!usernameFree || !emailFree)
             {
-                return this.BadRequest(new { message = "Invalid username or email." });
+                return this.BadRequest(new { messages = new[] { "Invalid username or email." } });
             }
 
             return null;
