@@ -60,6 +60,7 @@ namespace Api.Controllers.V1
             col.InsertOne(new User
             {
                 Username = newUser.Username,
+                DisplayName = newUser.DisplayName,
                 Password = SecurityHelpers.BytesToString(hashed),
                 PasswordSalt = SecurityHelpers.BytesToString(salt),
                 Email = newUser.Email
