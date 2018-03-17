@@ -1,7 +1,7 @@
 <template>
   <section class="section">
     <div v-if="errors.length">
-      <b>Please correct the following error(s):</b>
+      <b>{{$t('pleaseCorrectErrors')}}</b>
       <ul>
         <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
       </ul>
@@ -12,9 +12,9 @@
       <div class="column">
 
         <div class="field">
-          <label class="label">Username</label>
+          <label class="label">{{$t('username')}}</label>
           <div class="control has-icons-left">
-            <input class="input" type="text" placeholder="Username" v-model="username">
+            <input class="input" type="text" :placeholder="$t('username')" v-model="username">
             <span class="icon is-small is-left">
               <i class="fas fa-user"></i>
             </span>
@@ -22,9 +22,9 @@
         </div>
 
         <div class="field">
-          <label class="label">Password</label>
+          <label class="label">{{$t('password')}}</label>
           <div class="control has-icons-left">
-            <input class="input" type="password" placeholder="Password" v-model="password">
+            <input class="input" type="password" :placeholder="$t('password')" v-model="password">
             <span class="icon is-small is-left">
               <i class="fas fa-key"></i>
             </span>
@@ -32,9 +32,9 @@
         </div>
 
         <div class="field">
-          <label class="label">Confirm Password</label>
+          <label class="label">{{$t('confirmPassword')}}</label>
           <div class="control has-icons-left">
-            <input class="input" type="password" placeholder="Confirm Password" v-model="passwordConfirm">
+            <input class="input" type="password" :placeholder="$t('confirmPassword')" v-model="passwordConfirm">
             <span class="icon is-small is-left">
               <i class="fas fa-key"></i>
             </span>
@@ -42,9 +42,9 @@
         </div>
 
         <div class="field">
-          <label class="label">Email</label>
+          <label class="label">{{$t('email')}}</label>
           <div class="control has-icons-left">
-            <input class="input" type="email" placeholder="Email" v-model="email">
+            <input class="input" type="email" :placeholder="$t('email')" v-model="email">
             <span class="icon is-small is-left">
               <i class="fas fa-envelope"></i>
             </span>
@@ -55,14 +55,15 @@
           <div class="control">
             <label class="checkbox">
               <input type="checkbox">
-              I agree to the <a href="#">terms and conditions</a>
+              {{$t('agreeWithTermsAndConditions')}}
+              <a href="#">{{$t('reviewTermsAndConditions')}}</a>
             </label>
           </div>
         </div>
 
         <div class="field">
           <div class="control">
-            <button class="button is-link is-pulled-right" @click="submitRegistration" :disabled="submittingRegistration">Submit</button>
+            <button class="button is-link is-pulled-right" @click="submitRegistration" :disabled="submittingRegistration">{{$t('submit')}}</button>
           </div>
         </div>
       </div>
@@ -75,10 +76,9 @@
 import axios from 'axios'
 
 export default {
-  name: 'HelloWorld',
+  name: 'Register',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App',
       submittingRegistration: false,
       errors: [],
       username: '',
@@ -108,7 +108,9 @@ export default {
           this.errors.push('Success!')
         })
         .catch(e => {
-          this.errors.push(e.response.data['message'])
+          e.response.data['messages'].forEach(message => {
+            this.errors.push(message);
+          });
         })
       this.submittingRegistration = false
     }
