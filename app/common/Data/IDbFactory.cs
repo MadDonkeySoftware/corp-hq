@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Data
+namespace Common.Data
 {
     using System;
 

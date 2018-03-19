@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Data
+namespace Common.Data
 {
     using System;
 
@@ -58,7 +58,7 @@ namespace Api.Data
             return db.GetCollection<T>(collectionName);
         }
 
-        internal static void SetClient(IMongoClient client)
+        public static void SetClient(IMongoClient client)
         {
             DbFactory.client = client;
         }

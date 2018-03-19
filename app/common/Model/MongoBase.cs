@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Model
+namespace Common.Model
 {
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
