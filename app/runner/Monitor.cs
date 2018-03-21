@@ -3,10 +3,14 @@
 namespace Runner
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using Common.Data;
+    using Common.Model;
+    using MongoDB.Bson;
     using MongoDB.Driver;
     using MongoDB.Driver.Linq;
+    using Newtonsoft.Json;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using Runner.Model;
@@ -27,10 +31,8 @@ namespace Runner
         private EventingBasicConsumer jobsConsumer;
         private string controlQueueName;
 
-        internal Monitor(IConnectionFactory connectionFactory)
+        internal Monitor()
         {
-            this.connection = connectionFactory.CreateConnection();
-            this.channel = this.connection.CreateModel();
         }
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace Runner
                 {
                     if (instance == null)
                     {
-                        instance = new Monitor(Monitor.connectionFactory);
+                        instance = new Monitor();
                     }
 
                     return instance;
@@ -68,6 +70,15 @@ namespace Runner
         /// </summary>
         public void Start()
         {
+            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>("corp-hq", "settings");
+            var settings = settingsCollection.Find(new BsonDocument { { "key", "rabbitConnection" } }).First().Value;
+
+            connectionFactory.UserName = settings.Username;
+            connectionFactory.Password = settings.Password;
+
+            this.connection = connectionFactory.CreateConnection(settings.Hosts.Select(h => h.Address).ToList());
+            this.channel = this.connection.CreateModel();
+
             // Get queue name for runner-specific purposes.
             this.controlQueueName = this.channel.QueueDeclare().QueueName;
 
@@ -154,7 +165,7 @@ namespace Runner
         private void HandleJobMessage(object sender, BasicDeliverEventArgs e)
         {
             var uuid = new Guid(e.Body);
-            Console.WriteLine(" [x] Received {0}", uuid.ToString());
+            Console.WriteLine(" [x] Received  {0}", uuid.ToString());
 
             /* TODO: Actual job processing logic here. */
 

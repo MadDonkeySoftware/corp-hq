@@ -1,4 +1,4 @@
-﻿// Copyright (c) MadDonkeySoftware
+// Copyright (c) MadDonkeySoftware
 
 namespace Runner
 {
@@ -20,9 +20,6 @@ namespace Runner
     /// </summary>
     public static class Program
     {
-        private static IConnectionFactory rabbitConnectionFactory;
-        private static DbFactory dbFactory;
-
         /// <summary>
         /// The main entry point for the program.
         /// </summary>
@@ -38,12 +35,8 @@ namespace Runner
         {
             var connString = new MongoUrl(Environment.GetEnvironmentVariable("MONGO_CONNECTION"));
             DbFactory.SetClient(new MongoClient(connString));
-            Program.dbFactory = new DbFactory();
 
-            // TODO: Get rabbit connection details from the database.
-            var col = dbFactory.GetCollection<TaskRunner>("corp-hq", "settings");
-            rabbitConnectionFactory = new ConnectionFactory() { HostName = "localhost", UserName = "rabbitmq", Password = "rabbitmq" };
-            Monitor.Initialize(rabbitConnectionFactory, dbFactory);
+            Monitor.Initialize(new ConnectionFactory(), new DbFactory());
         }
     }
 }
