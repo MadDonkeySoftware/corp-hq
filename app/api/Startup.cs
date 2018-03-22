@@ -6,7 +6,8 @@ namespace Api
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Api.Data;
+
+    using Common.Data;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ namespace Api
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using MongoDB.Driver;
+    using RabbitMQ.Client;
 
     /// <summary>
     /// The class containing the startup configuration for the web api.
@@ -54,8 +56,12 @@ namespace Api
             var connString = new MongoUrl(Environment.GetEnvironmentVariable("MONGO_CONNECTION"));
             DbFactory.SetClient(new MongoClient(connString));
 
+            // TODO: Read this configuration from the database.
+            var rabbitConnectionFactory = new ConnectionFactory() { HostName = "localhost", UserName = "rabbitmq", Password = "rabbitmq" };
+
             // Add application services
             services.AddSingleton<IDbFactory, DbFactory>();
+            services.AddSingleton<ConnectionFactory>(rabbitConnectionFactory);
         }
 
         /// <summary>

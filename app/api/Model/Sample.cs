@@ -2,6 +2,7 @@
 
 namespace Api.Model
 {
+    using Common.Model;
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
 

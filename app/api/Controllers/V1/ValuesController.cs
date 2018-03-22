@@ -7,8 +7,8 @@ namespace Api.Controllers.V1
     using System.Linq;
     using System.Threading.Tasks;
 
-    using Api.Data;
     using Api.Model;
+    using Common.Data;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using MongoDB.Bson;
