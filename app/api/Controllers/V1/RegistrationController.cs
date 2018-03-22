@@ -45,14 +45,27 @@ namespace Api.Controllers.V1
         [HttpPost]
         public ActionResult Post([FromBody]RegistrationUser newUser)
         {
-            this.logger.LogDebug(1001, "Adding to list of values");
             var col = this.dbFactory.GetCollection<User>("corp-hq", "users");
+            if (!this.ModelState.IsValid)
+            {
+                var errs = this.GetErrorResult(newUser, col);
+                if (errs != null)
+                {
+                    //return this.BadRequest(new { messages = errs.ToList() });
+                    return errs;
+                }
+                return this.BadRequest("This is awkward, you missed some fields, but I'm nt sure which ones...");
+            }
 
+            this.logger.LogDebug(1001, "Adding to list of values");
+
+            /*
             var error = this.ValidateUserRegistrationBody(newUser, col);
             if (error != null)
             {
                 return error;
             }
+            */
 
             var salt = SecurityHelpers.GetSalt();
             var hashed = SecurityHelpers.GenerateSaltedHash(newUser.Password, salt);
@@ -67,6 +80,29 @@ namespace Api.Controllers.V1
             });
 
             return this.Accepted();
+        }
+
+        private BadRequestObjectResult GetErrorResult(RegistrationUser user, IMongoCollection<User> col)
+        {
+            var errors = from x in this.ModelState.Values 
+                from y in x.Errors 
+                where x.Errors.Count > 0 
+                select y.ErrorMessage;
+
+            if (errors.Any())
+            {
+                return this.BadRequest(new { messages = errors.ToList() });
+            }
+
+            var usernameFree = col.Count(new BsonDocument { { "username", user.Username } }) == 0;
+            var emailFree = col.Count(new BsonDocument { { "email", user.Email } }) == 0;
+
+            if (!usernameFree || !emailFree)
+            {
+                return this.BadRequest(new { messages = new[] { "Invalid username or email." } });
+            }
+
+            return null;
         }
 
         private BadRequestObjectResult ValidateUserRegistrationBody(RegistrationUser user, IMongoCollection<User> col)
