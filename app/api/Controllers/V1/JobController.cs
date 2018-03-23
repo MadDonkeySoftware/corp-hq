@@ -8,7 +8,9 @@ namespace Api.Controllers.V1
     using System.Threading.Tasks;
 
     using Api.Model;
+    using Common;
     using Common.Data;
+    using Common.Model;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using MongoDB.Bson;
@@ -53,13 +55,15 @@ namespace Api.Controllers.V1
             Console.WriteLine(newUser);
             this.logger.LogDebug(1001, "Adding new task to the queue.");
             var newTaskUuid = Guid.NewGuid();
-            var col = this.dbFactory.GetCollection<Job>("corp-hq", "jobs");
+            var col = this.dbFactory.GetCollection<Job<object>>("corp-hq", CollectionNames.Jobs);
 
-            col.InsertOne(new Job
+            col.InsertOne(new Job<object>
             {
                 Uuid = newTaskUuid.ToString(),
-                Type = "TestMessage",
-                Data = JsonConvert.SerializeObject(new Dictionary<string, string> { { "arg", "arg1" } })
+                Type = JobTypes.ApplyDbIndexes,
+
+                // Data = JsonConvert.SerializeObject(new Dictionary<string, string> { { "arg", "arg1" } })
+                Data = null
             });
 
             using (var connection = this.connectionFactory.CreateConnection())
