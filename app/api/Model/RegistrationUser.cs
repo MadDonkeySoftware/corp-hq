@@ -40,6 +40,8 @@ namespace Api.Model
         /// Gets or sets the password.
         /// </summary>
         [Required]
+        [StringLength(255, ErrorMessage = "Must be between 8 and 255 characters", MinimumLength = 8)]
+        [DataType(DataType.Password)]
         [JsonProperty("password")]
         public string Password { get; set; }
 
@@ -47,6 +49,8 @@ namespace Api.Model
         /// Gets or sets the password confirmation.
         /// </summary>
         [Required]
+        [Compare("Password", ErrorMessage = "Passwords must match")]
+        [DataType(DataType.Password)]
         [JsonProperty("passwordConfirm")]
         public string PasswordConfirm { get; set; }
 
