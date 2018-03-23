@@ -7,4 +7,4 @@ var rabbitSettings = {
     password: "rabbitmq"
 };
 
-db.settings.replaceOne({ key: "rabbitConnection" }, { key: "rabbitConnection", value: rabbitSettings});
+db.settings.replaceOne({ key: "rabbitConnection" }, { key: "rabbitConnection", value: rabbitSettings}, {upsert: true});
