@@ -4,6 +4,7 @@ namespace Runner.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -67,10 +68,13 @@ namespace Runner.Jobs
         /// <summary>
         /// Associates a message with this job.
         /// </summary>
-        /// <param name="message">The message to associate with the job.</param>
-        protected internal void AddMessage(string message)
+        /// <param name="format">The message format to associate with the job.</param>
+        /// <param name="args">The message args to associate with the job.</param>
+        protected internal void AddMessage(string format, params object[] args)
         {
             // TODO: Eventually these messages should be stored in our data store.
+            var message = string.Format(CultureInfo.CurrentCulture, format, args);
+            Console.WriteLine(message, args);
             this.Messages.Add(message);
         }
 

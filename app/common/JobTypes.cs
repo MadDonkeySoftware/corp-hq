@@ -8,5 +8,6 @@ namespace Common
     public struct JobTypes
     {
         public const string ApplyDbIndexes = "ApplyDbIndexes";
+        public const string ImportMapData = "ImportMapData";
     }
 }

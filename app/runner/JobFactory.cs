@@ -37,6 +37,9 @@ namespace Runner
                 case JobTypes.ApplyDbIndexes:
                     job = new CreateMongoIndexes();
                     break;
+                case JobTypes.ImportMapData:
+                    job = new ImportMapData();
+                    break;
                 default:
                     job = null;
                     break;

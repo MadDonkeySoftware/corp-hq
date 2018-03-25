@@ -23,12 +23,12 @@ namespace Runner.Jobs
 
         private void CreateRunnersIndexes(IDbFactory dbFactory)
         {
-            Console.WriteLine("Starting to apply indexes");
+            this.AddMessage("Starting to apply indexes");
             var runnerCol = dbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.Runners);
             runnerCol.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
-            Console.WriteLine("Finished applying indexes");
+            this.AddMessage("Finished applying indexes");
         }
     }
 }
