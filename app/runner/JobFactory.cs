@@ -26,28 +26,22 @@ namespace Runner
         /// <summary>
         /// Creates a new IJob instance for the appropriate job type.
         /// </summary>
-        /// <param name="key">The job type to initialize the job for.</param>
-        /// <param name="data">And data needing to be supplied to the job.</param>
+        /// <param name="jobSpec">The job specification to initialize the job for.</param>
         /// <returns>An instance of a job ready to be started.</returns>
-        public static IJob AcquireJob(string key, dynamic data)
+        public static IJob AcquireJob(JobSpecLite jobSpec)
         {
-            IJob<dynamic> job;
-            switch (key)
+            IJob job;
+            switch (jobSpec.Type)
             {
                 case JobTypes.ApplyDbIndexes:
-                    job = new CreateMongoIndexes();
+                    job = new CreateMongoIndexes(jobSpec.Uuid);
                     break;
                 case JobTypes.ImportMapData:
-                    job = new ImportMapData();
+                    job = new ImportMapData(jobSpec.Uuid);
                     break;
                 default:
                     job = null;
                     break;
-            }
-
-            if (job != null)
-            {
-                job.Data = data;
             }
 
             return (IJob)job;

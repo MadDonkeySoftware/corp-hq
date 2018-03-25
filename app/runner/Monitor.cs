@@ -182,22 +182,32 @@ namespace Runner
 
         private void HandleJobMessage(object sender, BasicDeliverEventArgs e)
         {
-            var uuid = new Guid(e.Body).ToString();
-            Console.WriteLine(" [x] Received  {0}", uuid);
-
-            /* TODO: Actual job processing logic here. */
-            var col = dbFactory.GetCollection<Common.Model.Job<dynamic>>(DbName, CollectionNames.Jobs);
-
-            var jobSpec = col.AsQueryable().Where(j => j.Uuid == uuid).FirstOrDefault();
-
-            var job = JobFactory.AcquireJob(jobSpec.Type, jobSpec.Data);
-            if (job != null)
+            try
             {
-                job.Start();
-            }
+                var uuid = new Guid(e.Body).ToString();
+                Console.WriteLine(" [x] Received  {0}", uuid);
 
-            this.channel.BasicAck(deliveryTag: e.DeliveryTag, multiple: false);
-            Console.WriteLine(" [x] Completed {0}", uuid);
+                /* TODO: Actual job processing logic here. */
+                var col = dbFactory.GetCollection<JobSpec<object>>(DbName, CollectionNames.Jobs);
+
+                var jobSpec = col.AsQueryable().Where(j => j.Uuid == uuid)
+                                               .Select(j => new JobSpecLite { Uuid = j.Uuid, Type = j.Type })
+                                               .FirstOrDefault();
+
+                var job = JobFactory.AcquireJob(jobSpec);
+                if (job != null)
+                {
+                    job.Start();
+                }
+
+                this.channel.BasicAck(deliveryTag: e.DeliveryTag, multiple: false);
+                Console.WriteLine(" [x] Completed {0}", uuid);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: {0}", ex.Message);
+                Console.WriteLine("{0}", ex.StackTrace);
+            }
         }
     }
 }

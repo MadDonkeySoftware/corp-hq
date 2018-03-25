@@ -2,6 +2,7 @@
 
 namespace Common.Model
 {
+    using System;
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
     using Newtonsoft.Json;
@@ -21,5 +22,11 @@ namespace Common.Model
         [JsonIgnore]
         [BsonId]
         public ObjectId BaseId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        [BsonElement("expireAt")]
+        public DateTime? ExpireAt { get; set; }
     }
 }

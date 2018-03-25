@@ -16,20 +16,24 @@ namespace Runner.Jobs
     /// <summary>
     /// Job for creating the mongo indexes
     /// </summary>
-    internal class ImportMapData : Job<object>
+    internal class ImportMapData : Job
     {
         private static readonly HttpClient Client = new HttpClient();
+
+        public ImportMapData(string jobUuid)
+            : base(jobUuid)
+        {
+        }
 
         /// <summary>
         /// The main body for the job being run.
         /// </summary>
         protected override void Work()
         {
-            var dbFactory = new DbFactory();
-            this.ImportRegions(dbFactory);
+            this.ImportRegions();
         }
 
-        private void ImportRegions(IDbFactory dbFactory)
+        private void ImportRegions()
         {
             this.AddMessage("Fetching list of regions.");
 
@@ -40,7 +44,7 @@ namespace Runner.Jobs
             var regionsTask = Client.GetStringAsync(uri);
             var regions = JsonConvert.DeserializeObject<List<int>>(regionsTask.Result);
 
-            var regionCol = dbFactory.GetCollection<Region>("corp-hq", CollectionNames.Regions);
+            var regionCol = DbFactory.GetCollection<Region>("corp-hq", CollectionNames.Regions);
             foreach (var regionId in regions)
             {
                 this.AddMessage("Fetching data for region: {0}.", regionId);
