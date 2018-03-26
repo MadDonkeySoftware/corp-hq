@@ -43,6 +43,53 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
+        /// The GET verb handler that provides details on a specific job.
+        /// </summary>
+        /// <param name="jobUuid">The job to get info on.</param>
+        /// <returns>The details for the specified job.</returns>
+        [HttpGet("status/{jobUuid}")]
+        public dynamic GetStatus(string jobUuid)
+        {
+            var jobCol = this.dbFactory.GetCollection<JobSpecLite>("corp-hq", CollectionNames.Jobs);
+            var status = jobCol.AsQueryable().Where(j => j.Uuid == jobUuid).Select(j => j.Status).FirstOrDefault();
+
+            return new
+            {
+                status = status,
+            };
+        }
+
+        /// <summary>
+        /// The GET verb handler that provides details on a specific job.
+        /// </summary>
+        /// <param name="jobUuid">The job to get info on.</param>
+        /// <returns>The details for the specified job.</returns>
+        [HttpGet("{jobUuid}")]
+        public dynamic Get(string jobUuid)
+        {
+            var jobCol = this.dbFactory.GetCollection<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs);
+            var jobSpec = jobCol.AsQueryable().Where(j => j.Uuid == jobUuid).Select(j => new { Status = j.Status, Type = j.Type, Start = j.StartTimestamp, End = j.EndTimestamp }).FirstOrDefault();
+
+            if (jobSpec == null)
+            {
+                return this.NotFound(new { message = "Not Found" });
+            }
+
+            var messagesCol = this.dbFactory.GetCollection<JobMessage>("corp-hq", CollectionNames.JobMessages);
+            var messages = messagesCol.AsQueryable().Where(m => m.JobUuid == jobUuid).Select(m => m.Message).ToList();
+
+            return new
+            {
+                uuid = jobUuid,
+                status = jobSpec.Status,
+                type = jobSpec.Type,
+                startTimestamp = jobSpec.Start,
+                endTimestamp = jobSpec.End,
+                messages = messages
+            };
+        }
+
+        /// <summary>
         /// The POST verb handler
         /// </summary>
         /// <param name="jobDetails">The details submitted for the new job.</param>
@@ -71,6 +118,7 @@ namespace Api.Controllers.V1
 
                 // Data = JsonConvert.SerializeObject(new Dictionary<string, string> { { "arg", "arg1" } })
                 Data = null,
+                Status = JobStatuses.New,
                 ExpireAt = DateTime.Now.AddDays(3)
             });
 
