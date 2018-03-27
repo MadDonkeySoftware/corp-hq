@@ -102,7 +102,7 @@ namespace Api.Controllers.V1
         {
             this.logger.LogDebug(1001, "Adding new job to the queue.");
             var newJobUuid = Guid.NewGuid();
-            var col = this.dbFactory.GetCollection<JobSpec<object>>("corp-hq", CollectionNames.Jobs);
+            var col = this.dbFactory.GetCollection<JobSpec<string>>("corp-hq", CollectionNames.Jobs);
 
             var messages = VerifyJobType(jobDetails.JobType);
             if (messages.Count() > 0)
@@ -111,13 +111,11 @@ namespace Api.Controllers.V1
             }
 
             // TODO: Make Job expirary configurable via the settings db.
-            col.InsertOne(new JobSpec<object>
+            col.InsertOne(new JobSpec<string>
             {
                 Uuid = newJobUuid.ToString(),
                 Type = jobDetails.JobType,
-
-                // Data = JsonConvert.SerializeObject(new Dictionary<string, string> { { "arg", "arg1" } })
-                Data = null,
+                Data = JsonConvert.SerializeObject(jobDetails.Data),
                 Status = JobStatuses.New,
                 ExpireAt = DateTime.Now.AddDays(3)
             });
@@ -152,7 +150,8 @@ namespace Api.Controllers.V1
             var availableTypes = new[]
             {
                 JobTypes.ApplyDbIndexes,
-                JobTypes.ImportMapData
+                JobTypes.ImportMapData,
+                JobTypes.ImportMarketData
             };
 
             if (availableTypes.Contains(jobType))
