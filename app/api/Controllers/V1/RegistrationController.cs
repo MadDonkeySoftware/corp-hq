@@ -7,6 +7,7 @@ namespace Api.Controllers.V1
     using System.Linq;
     using System.Threading.Tasks;
 
+    using Api.Extensions;
     using Api.Model;
     using Common.Data;
     using Microsoft.AspNetCore.Mvc;
@@ -45,14 +46,29 @@ namespace Api.Controllers.V1
         [HttpPost]
         public ActionResult Post([FromBody]RegistrationUser newUser)
         {
-            this.logger.LogDebug(1001, "Adding to list of values");
             var col = this.dbFactory.GetCollection<User>("corp-hq", "users");
-
-            var error = this.ValidateUserRegistrationBody(newUser, col);
-            if (error != null)
+            if (!this.ModelState.IsValid)
             {
-                return error;
+                // get built in errors
+                var errs = this.ModelState.Errors();
+                if (errs.Any())
+                {
+                    return this.BadRequest(new { messages = errs });
+                }
+                else
+                {
+                    // get Action specific errors
+                    errs = ValidateUserRegistrationBody(newUser, col);
+                    if (errs.Any())
+                    {
+                        return this.BadRequest(new { messages = errs });
+                    }
+                }
+
+                return this.BadRequest("This is awkward, you missed some fields, but I'm not sure which ones...");
             }
+
+            this.logger.LogDebug(1001, "Adding to list of values");
 
             var salt = SecurityHelpers.GetSalt();
             var hashed = SecurityHelpers.GenerateSaltedHash(newUser.Password, salt);
@@ -69,56 +85,18 @@ namespace Api.Controllers.V1
             return this.Accepted();
         }
 
-        private BadRequestObjectResult ValidateUserRegistrationBody(RegistrationUser user, IMongoCollection<User> col)
+        private static List<string> ValidateUserRegistrationBody(RegistrationUser user, IMongoCollection<User> col)
         {
-            // Do "cheap" validations first.
-            // TODO: Figure out how to do validation the .NET way
-            var validationErrors = new List<string>();
-            if (user == null)
-            {
-                return this.BadRequest(new { messages = new[] { "Post body cannot be null." } });
-            }
-
-            if (string.IsNullOrWhiteSpace(user.Username))
-            {
-                validationErrors.Add("Username is a required field.");
-            }
-
-            if (string.IsNullOrWhiteSpace(user.Email))
-            {
-                validationErrors.Add("Email is a required field.");
-            }
-
-            if (string.IsNullOrWhiteSpace(user.Password))
-            {
-                validationErrors.Add("Password is a required field.");
-            }
-
-            if (string.IsNullOrWhiteSpace(user.PasswordConfirm))
-            {
-                validationErrors.Add("Password is a required field.");
-            }
-
-            if (user.Password != user.PasswordConfirm)
-            {
-                validationErrors.Add("Passwords do not match.");
-            }
-
-            if (validationErrors.Count > 0)
-            {
-                return this.BadRequest(new { messages = validationErrors });
-            }
-
-            // Perform more expensive validations.
+            // Perform expensive validations.
             var usernameFree = col.Count(new BsonDocument { { "username", user.Username } }) == 0;
             var emailFree = col.Count(new BsonDocument { { "email", user.Email } }) == 0;
 
             if (!usernameFree || !emailFree)
             {
-                return this.BadRequest(new { messages = new[] { "Invalid username or email." } });
+                return new List<string> { "Invalid username or email." };
             }
 
-            return null;
+            return new List<string>();
         }
     }
 }

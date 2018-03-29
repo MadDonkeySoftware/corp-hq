@@ -109,8 +109,8 @@ export default {
         })
         .catch(e => {
           e.response.data['messages'].forEach(message => {
-            this.errors.push(message);
-          });
+            this.errors.push(message)
+          })
         })
       this.submittingRegistration = false
     }
