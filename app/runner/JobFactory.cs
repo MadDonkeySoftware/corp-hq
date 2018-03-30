@@ -39,6 +39,9 @@ namespace Runner
                 case JobTypes.ImportMapData:
                     job = new ImportMapData(jobSpec.Uuid);
                     break;
+                case JobTypes.ImportMarketData:
+                    job = new ImportMarketData(jobSpec.Uuid);
+                    break;
                 default:
                     job = null;
                     break;

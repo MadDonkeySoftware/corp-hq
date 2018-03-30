@@ -9,6 +9,7 @@ namespace Common.Data
     {
         public const string JobMessages = "jobMessages";
         public const string Jobs = "jobs";
+        public const string MarketOrders = "marketOrders";
         public const string Regions = "regions";
         public const string Runners = "runners";
         public const string Settings = "settings";

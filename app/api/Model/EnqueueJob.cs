@@ -16,5 +16,11 @@ namespace Api.Model
         [Required]
         [JsonProperty("jobType")]
         public string JobType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the job data.
+        /// </summary>
+        [JsonProperty("data")]
+        public dynamic Data { get; set; }
     }
 }

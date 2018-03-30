@@ -9,5 +9,6 @@ namespace Common
     {
         public const string ApplyDbIndexes = "ApplyDbIndexes";
         public const string ImportMapData = "ImportMapData";
+        public const string ImportMarketData = "ImportMarketData";
     }
 }

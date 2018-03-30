@@ -19,8 +19,6 @@ namespace Runner.Jobs
     {
         protected static readonly DbFactory DbFactory = new DbFactory();
 
-        private readonly string jobUuid;
-
         private IMongoCollection<JobMessage> messageCollection;
         private IMongoCollection<JobSpec<dynamic>> jobSpecCollection;
 
@@ -30,9 +28,11 @@ namespace Runner.Jobs
         /// <param name="jobUuid">The job uuid this is running for.</param>
         public Job(string jobUuid)
         {
-            this.jobUuid = jobUuid;
+            this.JobUuid = jobUuid;
             this.Messages = new List<string>();
         }
+
+        protected internal string JobUuid { get; private set; }
 
         /// <summary>
         /// Gets the list of all messages associated with this job.
@@ -55,11 +55,10 @@ namespace Runner.Jobs
             catch (Exception ex)
             {
                 this.jobSpecCollection.UpdateOne(
-                    Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.jobUuid),
+                    Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobUuid),
                     Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Failed).Set(j => j.EndTimestamp, DateTime.Now));
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
-                throw;
             }
         }
 
@@ -69,7 +68,7 @@ namespace Runner.Jobs
         protected internal virtual void Initialize()
         {
             this.jobSpecCollection.UpdateOne(
-                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.jobUuid),
+                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobUuid),
                 Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Running).Set(j => j.StartTimestamp, DateTime.Now));
         }
 
@@ -79,7 +78,7 @@ namespace Runner.Jobs
         protected internal virtual void Conclude()
         {
             this.jobSpecCollection.UpdateOne(
-                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.jobUuid),
+                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobUuid),
                 Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Successful).Set(j => j.EndTimestamp, DateTime.Now));
         }
 
@@ -96,7 +95,7 @@ namespace Runner.Jobs
             this.Messages.Add(message);
             this.messageCollection.InsertOneAsync(new JobMessage
             {
-                JobUuid = this.jobUuid,
+                JobUuid = this.JobUuid,
                 ExpireAt = DateTime.Now.AddDays(3),
                 Timestamp = DateTime.Now,
                 Message = message
