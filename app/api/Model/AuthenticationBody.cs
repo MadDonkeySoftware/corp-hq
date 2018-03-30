@@ -8,7 +8,7 @@ namespace Api.Model
     /// <summary>
     /// A class that represents the data submitted for user registration.
     /// </summary>
-    public class RegistrationUser
+    public class AuthenticationBody
     {
         private string username;
 
@@ -27,38 +27,15 @@ namespace Api.Model
             set
             {
                 this.username = value.ToUpperInvariant();
-                this.DisplayName = value;
             }
         }
-
-        /// <summary>
-        /// Gets the display name for this user based on the user name.
-        /// </summary>
-        public string DisplayName { get; private set; }
 
         /// <summary>
         /// Gets or sets the password.
         /// </summary>
         [Required]
-        [StringLength(255, ErrorMessage = "Must be between 8 and 255 characters", MinimumLength = 8)]
         [DataType(DataType.Password)]
         [JsonProperty("password")]
         public string Password { get; set; }
-
-        /// <summary>
-        /// Gets or sets the password confirmation.
-        /// </summary>
-        [Required]
-        [Compare("Password", ErrorMessage = "Passwords must match")]
-        [DataType(DataType.Password)]
-        [JsonProperty("passwordConfirm")]
-        public string PasswordConfirm { get; set; }
-
-        /// <summary>
-        /// Gets or sets the email.
-        /// </summary>
-        [Required]
-        [JsonProperty("email")]
-        public string Email { get; set; }
     }
 }

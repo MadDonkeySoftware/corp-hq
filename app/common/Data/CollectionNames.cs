@@ -12,6 +12,7 @@ namespace Common.Data
         public const string MarketOrders = "marketOrders";
         public const string Regions = "regions";
         public const string Runners = "runners";
+        public const string Sessions = "sessions";
         public const string Settings = "settings";
         public const string Users = "users";
     }

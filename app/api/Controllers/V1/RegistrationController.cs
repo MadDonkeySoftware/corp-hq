@@ -76,8 +76,8 @@ namespace Api.Controllers.V1
             {
                 Username = newUser.Username,
                 DisplayName = newUser.DisplayName,
-                Password = SecurityHelpers.BytesToString(hashed),
-                PasswordSalt = SecurityHelpers.BytesToString(salt),
+                Password = hashed,
+                PasswordSalt = salt,
                 Email = newUser.Email
             });
 

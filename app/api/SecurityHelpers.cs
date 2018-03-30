@@ -80,5 +80,26 @@ namespace Api
 
             return salt;
         }
+
+        internal static string GetToken(int length = 64)
+        {
+            // Based on below link except "_" substituted in place of "."
+            // https://gist.github.com/diegojancic/9f78750f05550fa6039d2f6092e461e5
+            var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_-".ToCharArray();
+            var data = new byte[length];
+
+            using (var crypto = new RNGCryptoServiceProvider())
+            {
+                crypto.GetBytes(data);
+            }
+
+            var result = new StringBuilder(length);
+            foreach (byte b in data)
+            {
+                result.Append(chars[b % chars.Length]);
+            }
+
+            return result.ToString();
+        }
     }
 }
