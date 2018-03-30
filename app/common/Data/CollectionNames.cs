@@ -7,6 +7,7 @@ namespace Common.Data
     /// </summary>
     public struct CollectionNames
     {
+        public const string JobMessages = "jobMessages";
         public const string Jobs = "jobs";
         public const string Regions = "regions";
         public const string Runners = "runners";

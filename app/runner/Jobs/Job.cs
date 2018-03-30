@@ -4,28 +4,33 @@ namespace Runner.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
+    using Common.Data;
+    using Common.Model;
     using Microsoft.Extensions.Logging;
+    using MongoDB.Driver;
 
     /// <summary>
     /// Base Job class
     /// </summary>
-    /// <typeparam name="T">The type of data used by this job.</typeparam>
-    internal abstract class Job<T> : IJob<T>
-        where T : class
+    internal abstract class Job : IJob
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Job{T}"/> class.
-        /// </summary>
-        public Job()
-        {
-            this.Messages = new List<string>();
-        }
+        protected static readonly DbFactory DbFactory = new DbFactory();
+
+        private readonly string jobUuid;
+
+        private IMongoCollection<JobMessage> messageCollection;
 
         /// <summary>
-        /// Sets the data associated with this job
+        /// Initializes a new instance of the <see cref="Job"/> class.
         /// </summary>
-        public T Data { private get; set; }
+        /// <param name="jobUuid">The job uuid this is running for.</param>
+        public Job(string jobUuid)
+        {
+            this.jobUuid = jobUuid;
+            this.Messages = new List<string>();
+        }
 
         /// <summary>
         /// Gets the list of all messages associated with this job.
@@ -39,6 +44,7 @@ namespace Runner.Jobs
         {
             try
             {
+                this.messageCollection = DbFactory.GetCollection<JobMessage>("corp-hq", CollectionNames.JobMessages);
                 this.Initialize();
                 this.Work();
                 this.Conclude();
@@ -72,15 +78,40 @@ namespace Runner.Jobs
         /// <param name="args">The message args to associate with the job.</param>
         protected internal void AddMessage(string format, params object[] args)
         {
-            // TODO: Eventually these messages should be stored in our data store.
+            // TODO: Make Job Message expirary configurable via the settings db.
             var message = string.Format(CultureInfo.CurrentCulture, format, args);
             Console.WriteLine(message, args);
             this.Messages.Add(message);
+            this.messageCollection.InsertOneAsync(new JobMessage
+            {
+                JobUuid = this.jobUuid,
+                ExpireAt = DateTime.Now.AddDays(3),
+                Timestamp = DateTime.Now,
+                Message = message
+            });
         }
 
         /// <summary>
         /// The main body for the job being run.
         /// </summary>
         protected abstract void Work();
+    }
+
+    [SuppressMessage(
+        "StyleCop.CSharp.MaintainabilityRules",
+        "SA1402:FileMayOnlyContainASingleType",
+        Justification = "No way to resolve this issue as rules confict with one another.")]
+    internal abstract class Job<T> : Job, IJob<T>
+        where T : class
+    {
+        public Job(string jobUuid)
+            : base(jobUuid)
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets the data associated with this job.
+        /// </summary>
+        public T Data { get; set; }
     }
 }

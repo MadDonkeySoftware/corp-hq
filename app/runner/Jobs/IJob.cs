@@ -17,12 +17,12 @@ namespace Runner.Jobs
     /// Contract for a job in this system.
     /// </summary>
     /// <typeparam name="T">The type of data used by this job.</typeparam>
-    internal interface IJob<T> : IJob
+    public interface IJob<T> : IJob
         where T : class
     {
         /// <summary>
-        /// Sets the data that is associated with this job.
+        /// Gets or sets the data that is associated with this job.
         /// </summary>
-        T Data { set; }
+        T Data { get; set; }
     }
 }

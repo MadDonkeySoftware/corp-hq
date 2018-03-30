@@ -9,7 +9,7 @@ namespace Common.Model
     /// <summary>
     /// A class representing a user inside of the system.
     /// </summary>
-    public class Job<T> : MongoBase where T : class
+    public class JobSpecLite : MongoBase
     {
         /// <summary>
         /// Gets or sets the uuid.
@@ -22,11 +22,5 @@ namespace Common.Model
         /// </summary>
         [BsonElement("type")]
         public string Type { get; set; }
-
-        /// <summary>
-        /// Gets or sets the data for the job.
-        /// </summary>
-        [BsonElement("arguments")]
-        public T Data { get; set; }
     }
 }
