@@ -4,6 +4,7 @@ namespace Api.Controllers.V1
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -44,23 +45,28 @@ namespace Api.Controllers.V1
         /// <summary>
         /// The POST verb handler
         /// </summary>
-        /// <param name="newUser">The details submitted for a new user.</param>
+        /// <param name="jobDetails">The details submitted for the new job.</param>
         /// <returns>Success or error.</returns>
         /// <remarks>
         /// POST api/values
         /// </remarks>
         [HttpPost]
-        public ActionResult Post([FromBody]RegistrationUser newUser)
+        public ActionResult Post([FromBody]EnqueueJob jobDetails)
         {
-            Console.WriteLine(newUser);
-            this.logger.LogDebug(1001, "Adding new task to the queue.");
-            var newTaskUuid = Guid.NewGuid();
+            this.logger.LogDebug(1001, "Adding new job to the queue.");
+            var newJobUuid = Guid.NewGuid();
             var col = this.dbFactory.GetCollection<Job<object>>("corp-hq", CollectionNames.Jobs);
+
+            var messages = VerifyJobType(jobDetails.JobType);
+            if (messages.Count() > 0)
+            {
+                return this.BadRequest(new { messages = messages });
+            }
 
             col.InsertOne(new Job<object>
             {
-                Uuid = newTaskUuid.ToString(),
-                Type = JobTypes.ApplyDbIndexes,
+                Uuid = newJobUuid.ToString(),
+                Type = jobDetails.JobType,
 
                 // Data = JsonConvert.SerializeObject(new Dictionary<string, string> { { "arg", "arg1" } })
                 Data = null
@@ -81,10 +87,35 @@ namespace Api.Controllers.V1
                     exchange: string.Empty,
                     routingKey: "jobs",
                     basicProperties: null,
-                    body: newTaskUuid.ToByteArray());
+                    body: newJobUuid.ToByteArray());
             }
 
-            return this.Accepted(new { uuid = newTaskUuid });
+            return this.Accepted(new { uuid = newJobUuid });
+        }
+
+        private static List<string> VerifyJobType(string jobType)
+        {
+            // TODO: Find a better way to do this. Reflection maybe? Also, some job types will be restricted to certain users.
+            // Figure that out as well.
+            var messages = new List<string>();
+            Console.WriteLine("JobType" + jobType);
+            var availableTypes = new[]
+            {
+                JobTypes.ApplyDbIndexes,
+                JobTypes.ImportMapData
+            };
+
+            if (availableTypes.Contains(jobType))
+            {
+                Console.WriteLine("JobType found.");
+                return messages;
+            }
+
+            Console.WriteLine("JobType not found.");
+            messages.Add(string.Format(CultureInfo.InvariantCulture, "Job Type \"{0}\" unknown.", jobType));
+            messages.Add(string.Format(CultureInfo.InvariantCulture, "Available Job Types: {0}", string.Join(", ", availableTypes)));
+
+            return messages;
         }
     }
 }
