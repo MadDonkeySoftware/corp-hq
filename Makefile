@@ -6,9 +6,6 @@ build-api:  ## Builds the API displaying any analytics violations.
 build-runner:  ## Builds the API displaying any analytics violations.
 	dotnet build --no-incremental ./app/runner
 
-publish-runner:  ## Builds the API displaying any analytics violations.
-	dotnet publish --no-incremental --configuration Release ./app/runner
-
 build-ui:  ## Builds the vue web site to deployable assets
 	npm run --prefix ./app/ui build
 
