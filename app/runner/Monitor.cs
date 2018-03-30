@@ -5,6 +5,8 @@ namespace Runner
     using System;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
+    using Common;
     using Common.Data;
     using Common.Model;
     using MongoDB.Bson;
@@ -13,6 +15,7 @@ namespace Runner
     using Newtonsoft.Json;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Runner.Jobs;
     using Runner.Model;
 
     /// <summary>
@@ -20,6 +23,7 @@ namespace Runner
     /// </summary>
     public class Monitor : IDisposable
     {
+        private const string DbName = "corp-hq";
         private static readonly object Padlock = new object();
         private static Monitor instance = null;
         private static IConnectionFactory connectionFactory;
@@ -70,8 +74,8 @@ namespace Runner
         /// </summary>
         public void Start()
         {
-            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>("corp-hq", "settings");
-            var settings = settingsCollection.Find(new BsonDocument { { "key", "rabbitConnection" } }).First().Value;
+            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>(DbName, CollectionNames.Settings);
+            var settings = settingsCollection.AsQueryable().Where(s => s.Key == "rabbitConnection").First().Value;
 
             connectionFactory.UserName = settings.Username;
             connectionFactory.Password = settings.Password;
@@ -91,8 +95,22 @@ namespace Runner
                 arguments: null);
 
             // Add ourself to the runner collection
-            var col = dbFactory.GetCollection<TaskRunner>("corp-hq", "runners");
-            col.InsertOne(new TaskRunner { Name = this.controlQueueName });
+            var col = dbFactory.GetCollection<TaskRunner>(DbName, CollectionNames.Runners);
+            col.InsertOne(new TaskRunner { Name = this.controlQueueName, ExpireAt = DateTime.Now.AddMinutes(settings.RecordTtl) });
+
+            // Setup heartbeat
+            var t = Task.Run(() =>
+            {
+                while (!this.isDisposed)
+                {
+                    // Since we want to do a partial update we have to use the builder
+                    col.UpdateOne(
+                        r => r.Name == this.controlQueueName,
+                        Builders<TaskRunner>.Update.Set("expireAt", DateTime.Now.AddMinutes(settings.RecordTtl)));
+
+                    Thread.Sleep(1000 * 60 * settings.RecordHeartbeatInterval);
+                }
+            });
 
             // create consumers
             this.controlConsumer = new EventingBasicConsumer(this.channel);
@@ -157,20 +175,29 @@ namespace Runner
                 Thread.Sleep(1000);
             }
 
-            var col = dbFactory.GetCollection<TaskRunner>("corp-hq", "runners");
+            var col = dbFactory.GetCollection<TaskRunner>(DbName, CollectionNames.Runners);
             col.FindOneAndDelete(r => r.Name == this.controlQueueName);
             this.Dispose();
         }
 
         private void HandleJobMessage(object sender, BasicDeliverEventArgs e)
         {
-            var uuid = new Guid(e.Body);
-            Console.WriteLine(" [x] Received  {0}", uuid.ToString());
+            var uuid = new Guid(e.Body).ToString();
+            Console.WriteLine(" [x] Received  {0}", uuid);
 
             /* TODO: Actual job processing logic here. */
+            var col = dbFactory.GetCollection<Common.Model.Job<dynamic>>(DbName, CollectionNames.Jobs);
+
+            var jobSpec = col.AsQueryable().Where(j => j.Uuid == uuid).FirstOrDefault();
+
+            var job = JobFactory.AcquireJob(jobSpec.Type, jobSpec.Data);
+            if (job != null)
+            {
+                job.Start();
+            }
 
             this.channel.BasicAck(deliveryTag: e.DeliveryTag, multiple: false);
-            Console.WriteLine(" [x] Completed {0}", uuid.ToString());
+            Console.WriteLine(" [x] Completed {0}", uuid);
         }
     }
 }

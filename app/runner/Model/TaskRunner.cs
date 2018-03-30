@@ -2,6 +2,7 @@
 
 namespace Runner.Model
 {
+    using System;
     using Common.Model;
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
@@ -16,5 +17,11 @@ namespace Runner.Model
         /// </summary>
         [BsonElement("name")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        [BsonElement("expireAt")]
+        public DateTime ExpireAt { get; set; }
     }
 }

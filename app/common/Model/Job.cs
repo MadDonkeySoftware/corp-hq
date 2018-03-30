@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Model
+namespace Common.Model
 {
     using Common.Model;
     using MongoDB.Bson;
@@ -9,7 +9,7 @@ namespace Api.Model
     /// <summary>
     /// A class representing a user inside of the system.
     /// </summary>
-    public class Job : MongoBase
+    public class Job<T> : MongoBase where T : class
     {
         /// <summary>
         /// Gets or sets the uuid.
@@ -27,6 +27,6 @@ namespace Api.Model
         /// Gets or sets the data for the job.
         /// </summary>
         [BsonElement("arguments")]
-        public string Data { get; set; }
+        public T Data { get; set; }
     }
 }
