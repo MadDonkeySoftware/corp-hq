@@ -6,6 +6,7 @@ namespace Runner.Jobs
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
+    using Common;
     using Common.Data;
     using Common.Model;
     using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ namespace Runner.Jobs
         private readonly string jobUuid;
 
         private IMongoCollection<JobMessage> messageCollection;
+        private IMongoCollection<JobSpec<dynamic>> jobSpecCollection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Job"/> class.
@@ -45,12 +47,16 @@ namespace Runner.Jobs
             try
             {
                 this.messageCollection = DbFactory.GetCollection<JobMessage>("corp-hq", CollectionNames.JobMessages);
+                this.jobSpecCollection = DbFactory.GetCollection<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs);
                 this.Initialize();
                 this.Work();
                 this.Conclude();
             }
             catch (Exception ex)
             {
+                this.jobSpecCollection.UpdateOne(
+                    Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.jobUuid),
+                    Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Failed).Set(j => j.EndTimestamp, DateTime.Now));
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace);
                 throw;
@@ -62,6 +68,9 @@ namespace Runner.Jobs
         /// </summary>
         protected internal virtual void Initialize()
         {
+            this.jobSpecCollection.UpdateOne(
+                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.jobUuid),
+                Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Running).Set(j => j.StartTimestamp, DateTime.Now));
         }
 
         /// <summary>
@@ -69,6 +78,9 @@ namespace Runner.Jobs
         /// </summary>
         protected internal virtual void Conclude()
         {
+            this.jobSpecCollection.UpdateOne(
+                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.jobUuid),
+                Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Successful).Set(j => j.EndTimestamp, DateTime.Now));
         }
 
         /// <summary>

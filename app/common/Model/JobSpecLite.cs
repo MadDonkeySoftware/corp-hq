@@ -22,5 +22,11 @@ namespace Common.Model
         /// </summary>
         [BsonElement("type")]
         public string Type { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status of job.
+        /// </summary>
+        [BsonElement("status")]
+        public string Status { get; set; }
     }
 }
