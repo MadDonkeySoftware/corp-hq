@@ -46,26 +46,25 @@ namespace Api.Controllers.V1
         [HttpPost]
         public ActionResult Post([FromBody]RegistrationUser newUser)
         {
-            var col = this.dbFactory.GetCollection<User>("corp-hq", "users");
+            List<string> errors;
             if (!this.ModelState.IsValid)
             {
                 // get built in errors
-                var errs = this.ModelState.Errors();
-                if (errs.Any())
+                errors = this.ModelState.Errors();
+                if (errors.Any())
                 {
-                    return this.BadRequest(new { messages = errs });
-                }
-                else
-                {
-                    // get Action specific errors
-                    errs = ValidateUserRegistrationBody(newUser, col);
-                    if (errs.Any())
-                    {
-                        return this.BadRequest(new { messages = errs });
-                    }
+                    return this.BadRequest(new { messages = errors });
                 }
 
                 return this.BadRequest("This is awkward, you missed some fields, but I'm not sure which ones...");
+            }
+
+            // get Action specific errors
+            var col = this.dbFactory.GetCollection<User>("corp-hq", "users");
+            errors = ValidateUserRegistrationBody(newUser, col);
+            if (errors.Any())
+            {
+                return this.BadRequest(new { messages = errors });
             }
 
             this.logger.LogDebug(1001, "Adding to list of values");
