@@ -2,6 +2,7 @@
 
 namespace Api.Model
 {
+    using System.Diagnostics.CodeAnalysis;
     using Common.Model;
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
@@ -27,13 +28,15 @@ namespace Api.Model
         /// Gets or sets the password.
         /// </summary>
         [BsonElement("password")]
-        public string Password { get; set; }
+        [SuppressMessage("Microsoft.Performance", "CA1819::PropertiesShouldNotReturnArrays", Justification="Must be done this way to store in Mongo")]
+        public byte[] Password { get; set; }
 
         /// <summary>
         /// Gets or sets the password salt.
         /// </summary>
         [BsonElement("passwordSalt")]
-        public string PasswordSalt { get; set; }
+        [SuppressMessage("Microsoft.Performance", "CA1819::PropertiesShouldNotReturnArrays", Justification="Must be done this way to store in Mongo")]
+        public byte[] PasswordSalt { get; set; }
 
         /// <summary>
         /// Gets or sets the email.

@@ -26,7 +26,7 @@ namespace Runner.Jobs
             this.CreateRunnersIndexes();
             this.CreateJobsIndexes();
             this.CreateJobMessagesIndexes();
-            this.CreateMarketOrdersIndexes();
+            this.CreateSessionIndexes();
             this.AddMessage("Finished applying indexes");
         }
 
@@ -57,6 +57,14 @@ namespace Runner.Jobs
         private void CreateMarketOrdersIndexes()
         {
             var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.MarketOrders);
+            col.Indexes.CreateOne(
+                Builders<dynamic>.IndexKeys.Ascending("expireAt"),
+                new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
+        }
+
+        private void CreateSessionIndexes()
+        {
+            var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.Sessions);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
