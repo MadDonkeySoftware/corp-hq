@@ -315,3 +315,5 @@ package-lock.json
 mongo-data/
 app/api/api.xml
 app/runner/runner.xml
+docker-compose.yml
+Makefile
