@@ -58,7 +58,7 @@
         <div class="field">
           <div class="control">
             <label class="checkbox">
-              <input type="checkbox" :placeholder="$t('agreeWithTermsAndConditions')" v-model="agreeWithTermsAndConditions">
+              <input type="checkbox" v-model="agreeWithTermsAndConditions">
               {{$t('agreeWithTermsAndConditions')}}
               <a href="#">{{$t('reviewTermsAndConditions')}}</a>
             </label>
@@ -89,7 +89,7 @@ export default {
       password: '',
       passwordConfirm: '',
       email: '',
-      agreeWithTermsAndConfitions: ''
+      agreeWithTermsAndConfitions: false
     }
   },
   methods: {
