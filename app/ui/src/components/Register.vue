@@ -89,7 +89,7 @@ export default {
       password: '',
       passwordConfirm: '',
       email: '',
-      agreeWithTermsAndConfitions: false
+      agreeWithTermsAndConditions: false
     }
   },
   methods: {
@@ -101,7 +101,8 @@ export default {
           username: this.username,
           password: this.password,
           passwordConfirm: this.passwordConfirm,
-          email: this.email
+          email: this.email,
+          agreeWithTermsAndConditions: this.agreeWithTermsAndConditions
         }
         axios.post('http://127.0.0.1:5000/api/v1/registration', data)
           .then(response => {
@@ -131,7 +132,7 @@ export default {
       if (this.email.length === 0) {
         this.errors.push('Email is a required field.')
       }
-      if (!this.agreeWithTermsAndConfitions.checked) {
+      if (!this.agreeWithTermsAndConditions) {
         this.errors.push('You must agree with the Terms and Conditions to register with this site.')
       }
 
