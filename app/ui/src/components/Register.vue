@@ -1,10 +1,14 @@
 <template>
   <section class="section">
-    <div v-if="errors.length">
-      <b>{{$t('pleaseCorrectErrors')}}</b>
-      <ul>
-        <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
-      </ul>
+    <div class="columns">
+      <div class="column is-one-fifth"></div>
+        <div class="column" v-if="errors.length">
+            <b>{{$t('pleaseCorrectErrors')}}</b>
+            <ul>
+              <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
+            </ul>
+        </div>
+      <div class="column is-one-fifth"></div>
     </div>
 
     <div class="columns">
@@ -54,7 +58,7 @@
         <div class="field">
           <div class="control">
             <label class="checkbox">
-              <input type="checkbox">
+              <input type="checkbox" v-model="agreeWithTermsAndConditions">
               {{$t('agreeWithTermsAndConditions')}}
               <a href="#">{{$t('reviewTermsAndConditions')}}</a>
             </label>
@@ -84,35 +88,55 @@ export default {
       username: '',
       password: '',
       passwordConfirm: '',
-      email: ''
+      email: '',
+      agreeWithTermsAndConditions: false
     }
   },
   methods: {
     submitRegistration () {
       this.errors = []
       this.submittingRegistration = true
-      var data = {
-        username: this.username,
-        password: this.password,
-        passwordConfirm: this.passwordConfirm,
-        email: this.email
-      }
-      axios.post('http://127.0.0.1:5000/api/v1/registration', data)
-        .then(response => {
-          // Json response
-          // var items = []
-          // response.data.forEach(element => {
-          //   items.push(element['value'])
-          // })
-          // this.msg = 'Welcome to your Vue.js App. ' + items.join(', ')
-          this.errors.push('Success!')
-        })
-        .catch(e => {
-          e.response.data['messages'].forEach(message => {
-            this.errors.push(message)
+      if (this.isFormValid()) {
+        var data = {
+          username: this.username,
+          password: this.password,
+          passwordConfirm: this.passwordConfirm,
+          email: this.email,
+          agreeWithTermsAndConditions: this.agreeWithTermsAndConditions
+        }
+        axios.post('http://127.0.0.1:5000/api/v1/registration', data)
+          .then(response => {
+            this.errors.push('Success!')
           })
-        })
+          .catch(e => {
+            e.response.data['messages'].forEach(message => {
+              this.errors.push(message)
+            })
+          })
+      }
       this.submittingRegistration = false
+    },
+    isFormValid () {
+      if (this.username.length === 0) {
+        this.errors.push('Username is a required field.')
+      }
+      if (this.password.length === 0) {
+        this.errors.push('Password is a required field.')
+      }
+      if (this.passwordConfirm.length === 0) {
+        this.errors.push('Password Confirmation is a required field.')
+      }
+      if (this.password !== this.passwordConfirm) {
+        this.errors.push('Password and Password Confirmation must match.')
+      }
+      if (this.email.length === 0) {
+        this.errors.push('Email is a required field.')
+      }
+      if (!this.agreeWithTermsAndConditions) {
+        this.errors.push('You must agree with the Terms and Conditions to register with this site.')
+      }
+
+      return this.errors.length === 0
     }
   }
 }

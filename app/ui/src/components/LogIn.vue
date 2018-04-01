@@ -1,10 +1,14 @@
 <template>
   <section class="section">
-    <div v-if="errors.length">
-      <b>{{$t('pleaseCorrectErrors')}}</b>
-      <ul>
-        <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
-      </ul>
+    <div class="columns">
+      <div class="column is-one-fifth"></div>
+        <div class="column is-danger" v-if="errors.length">
+          <b>{{$t('pleaseCorrectErrors')}}</b>
+          <ul>
+            <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
+          </ul>
+        </div>
+      <div class="column is-one-fifth"></div>
     </div>
 
     <div class="columns">
@@ -77,7 +81,6 @@ export default {
       this.submittingLogin = false
     },
     isFormValid () {
-
       if (this.username.length === 0) {
         this.errors.push('Username is a required field.')
       }
