@@ -7,7 +7,7 @@ namespace Api.Controllers.V1
     using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
-
+    using Api.Extensions;
     using Api.Model;
     using Common;
     using Common.Data;
@@ -120,7 +120,7 @@ namespace Api.Controllers.V1
                 ExpireAt = DateTime.Now.AddDays(3)
             });
 
-            using (var connection = this.connectionFactory.CreateConnection())
+            using (var connection = this.connectionFactory.CreateConfiguredConnection())
             using (var channel = connection.CreateModel())
             {
                 // TODO: Move channel queue declare to startup.

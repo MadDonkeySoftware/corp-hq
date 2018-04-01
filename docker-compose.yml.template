@@ -3,21 +3,26 @@ services:
     ui:
         container_name: "corp-hq-ui"
         build: ./app/ui
+        image: "corp-hq-ui"
         ports:
             - 8080:80
     api:
         container_name: "corp-hq-api"
         build: ./app/api
+        image: "corp-hq-api"
         ports:
             - 5000:80
         environment:
-            - MONGO_CONNECTION=mongodb://127.0.0.1:27017/corp-hq
+            - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+        links:
+            - "mongodb:mongo"
+            - "rabbitmq:rabbit"
     runner:
         container_name: "corp-hq-runner"
+        build: ./app/runner
         image: "corp-hq-runner"
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
-            - RABBIT_IP=rabbit
         links:
             - "mongodb:mongo"
             - "rabbitmq:rabbit"
