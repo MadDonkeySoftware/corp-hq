@@ -4,6 +4,8 @@
   - [Requirements](#requirements)
   - [Install Dependencies](#install-dependencies)
   - [Running the applications and dependencies](#running-the-applications-and-dependencies)
+  - [Getting Help](#getting-help)
+    - [Core developers](#core-developers)
 
 ## General Notes
 * `<root>` will signify the root directory of this solution. This is the directory with "LICENSE" and "app" in it.
@@ -46,3 +48,14 @@
 * API Project
   * `cd <root>/app/api`
   * `dotnet run`
+
+## Getting Help
+One excellent way of getting help getting your environment set up is to ask a question on the [Discord](https://discord.gg/FvTw9pF) chat. Join the "help" channel and post your question!
+
+### Core developers
+As cores join and leave the project we will try to keep this list as up to date as possible.
+
+| Developer (GitHub user) | Environment   |
+| ----------------------- | ------------- |
+| fritogotlayed           | Mac OS        |
+| naitp                   | Linux         |
