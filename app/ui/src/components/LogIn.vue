@@ -71,7 +71,7 @@ export default {
         axios.post('http://127.0.0.1:5000/api/v1/authentication', data)
           .then(response => {
             localStorage.setItem('token', response.data['token'])
-            this.errors.push('Success!')
+            this.$router.push({name: 'Dashboard', params: { userId: 123 }})
           })
           .catch(e => {
             this.errors.push('Invalid login information.')
