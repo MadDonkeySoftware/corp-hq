@@ -3,6 +3,9 @@
 build-api:  ## Builds the API displaying any analytics violations.
 	dotnet build --no-incremental ./app/api
 
+build-api-tests:  ## Builds the API tests.
+	dotnet build --no-incremental ./tests/api
+
 build-runner:  ## Builds the API displaying any analytics violations.
 	dotnet build --no-incremental ./app/runner
 
@@ -31,6 +34,10 @@ seed-data:  ## Executes the seed data against the local mongo database.
 
 run-api: build-api  ## Builds the API then runs it.
 	MONGO_CONNECTION=mongodb://127.0.0.1:27017/corp-hq dotnet run -p ./app/api
+
+run-api-tests: build-api-tests  ## Builds the API tests then runs them
+	# This is super hacky but dotnet 2.0 doesn't support xunit as a global command.
+	cd ./tests/api; dotnet xunit; cd ../..;
 
 run-runner: build-runner  ## Builds the API then runs it.
 	MONGO_CONNECTION=mongodb://127.0.0.1:27017/corp-hq dotnet run -p ./app/runner
