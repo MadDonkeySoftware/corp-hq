@@ -18,7 +18,7 @@ namespace Runner.Jobs
     /// </summary>
     internal class ImportMapData : Job
     {
-        private static readonly HttpClient Client = new HttpClient();
+        private static readonly SmartHttpClient Client = new SmartHttpClient();
 
         public ImportMapData(string jobUuid)
             : base(jobUuid)
@@ -41,16 +41,16 @@ namespace Runner.Jobs
             Client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             var uri = new Uri("https://esi.tech.ccp.is/latest/universe/regions");
-            var regionsTask = Client.GetStringAsync(uri);
-            var regions = JsonConvert.DeserializeObject<List<int>>(regionsTask.Result);
+            var result = Client.GetWithReties(uri);
+            var regions = JsonConvert.DeserializeObject<List<int>>(result);
 
             var regionCol = DbFactory.GetCollection<Region>("corp-hq", CollectionNames.Regions);
             foreach (var regionId in regions)
             {
                 this.AddMessage("Fetching data for region: {0}.", regionId);
                 uri = new Uri(string.Concat("https://esi.tech.ccp.is/latest/universe/regions/", regionId));
-                var regionDetailsTask = Client.GetStringAsync(uri);
-                var regionDetails = JsonConvert.DeserializeObject<RegionDetailsData>(regionDetailsTask.Result);
+                result = Client.GetWithReties(uri);
+                var regionDetails = JsonConvert.DeserializeObject<RegionDetailsData>(result);
 
                 var regionData = new Region
                 {

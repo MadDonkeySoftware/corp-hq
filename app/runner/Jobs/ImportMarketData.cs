@@ -21,7 +21,7 @@ namespace Runner.Jobs
     /// </summary>
     internal class ImportMarketData : Job
     {
-        private static readonly HttpClient Client = new HttpClient();
+        private static readonly SmartHttpClient Client = new SmartHttpClient();
         private IMongoCollection<MarketOrder> marketOrderCol;
 
         public ImportMarketData(string jobUuid)
@@ -76,8 +76,8 @@ namespace Runner.Jobs
                     regionId,
                     id,
                     page));
-                var marketDataTask = Client.GetStringAsync(uri);
-                var marketOrders = JsonConvert.DeserializeObject<List<EveMarketOrder>>(marketDataTask.Result);
+                var result = Client.GetWithReties(uri);
+                var marketOrders = JsonConvert.DeserializeObject<List<EveMarketOrder>>(result);
 
                 foreach (var order in marketOrders)
                 {
