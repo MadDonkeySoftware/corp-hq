@@ -12,7 +12,7 @@ build-runner:  ## Builds the API displaying any analytics violations.
 build-ui:  ## Builds the vue web site to deployable assets
 	npm run --prefix ./app/ui build
 
-docker-build-api: build-api  ## Runs the docker build for the corp-hq api project
+docker-build-api: publish-api  ## Runs the docker build for the corp-hq api project
 	docker build --no-cache -t corp-hq-api ./app/api
 
 docker-build-images: docker-build-api docker-build-runner docker-build-ui  ## Run the docker build for all the projects
@@ -26,7 +26,10 @@ docker-build-ui: build-ui  ## Runs the docker build for the corp-hq ui project
 help:  ## Prints this help message.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-publish-runner:  ## Publishes the API displaying any analytics violations.
+publish-api:  ## Publishes the API displaying any analytics violations.
+	dotnet publish --configuration Release ./app/api
+
+publish-runner:  ## Publishes the runner displaying any analytics violations.
 	dotnet publish --configuration Release ./app/runner
 
 seed-data:  ## Executes the seed data against the local mongo database.

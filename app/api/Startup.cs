@@ -56,7 +56,6 @@ namespace Api
             var connString = new MongoUrl(Environment.GetEnvironmentVariable("MONGO_CONNECTION"));
             DbFactory.SetClient(new MongoClient(connString));
 
-            // TODO: Read this configuration from the database.
             var rabbitConnectionFactory = new ConnectionFactory() { HostName = "localhost", UserName = "rabbitmq", Password = "rabbitmq" };
 
             // Add application services
