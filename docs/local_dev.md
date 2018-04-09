@@ -1,5 +1,9 @@
 # Local Development Guide
-- [Requirements](#requirements)
+- [Local Development Guide](#local-development-guide)
+  - [General Notes](#general-notes)
+  - [Requirements](#requirements)
+  - [Install Dependencies](#install-dependencies)
+  - [Running the applications and dependencies](#running-the-applications-and-dependencies)
 
 ## General Notes
 * `<root>` will signify the root directory of this solution. This is the directory with "LICENSE" and "app" in it.
@@ -8,7 +12,7 @@
 * [DotNet Core SDK](https://www.microsoft.com/net/download)
 * [Vue.JS](https://vuejs.org) / `vlue-cli` via NPM
 * Some kind of editor
-  * I am using [VS Code](https://code.visualstudio.com/download) with the following extensions. This is a "cleaned up" list with items only relivant to this project.
+  * Most are using [VS Code](https://code.visualstudio.com/download) with the following extensions. This is a "cleaned up" list with items only relivant to this project.
     * christian-kohler.npm-intellisense
     * dariofuzinato.vue-peek
     * donjayamanne.githistory
@@ -30,6 +34,7 @@
 
 ## Running the applications and dependencies
 * Notes
+  * For users using linux or MacOS there is a `Makefile.template` that may be useful. The makefile template is used to offer useful things between menbers of the team. Your actual `Makefile` should never be committed to the project simplay because each contributor may have different security setups.
   * Most, if not all, of the non-external dependences should be controllable through the standard `docker-compose` services. The `up` and `down` commands are usually sufficient but feel free to see `docker-compose` for help.
   * For those that can run `make` on their system the `Makefile` has a few handy shortcuts for common actions taken by devs.
 * Dependencies
