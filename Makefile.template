@@ -4,7 +4,7 @@ build-api:  ## Builds the API displaying any analytics violations.
 	dotnet build --no-incremental ./app/api
 
 build-api-tests:  ## Builds the API tests.
-	dotnet build --no-incremental ./tests/api
+	dotnet build --no-incremental ./tests/unit/apitest
 
 build-runner:  ## Builds the API displaying any analytics violations.
 	dotnet build --no-incremental ./app/runner
@@ -40,7 +40,7 @@ run-api: build-api  ## Builds the API then runs it.
 
 run-api-tests: build-api-tests  ## Builds the API tests then runs them
 	# This is super hacky but dotnet 2.0 doesn't support xunit as a global command.
-	cd ./tests/api; dotnet xunit; cd ../..;
+	cd ./tests/unit/apitest; dotnet xunit; cd ../../..;
 
 run-runner: build-runner  ## Builds the API then runs it.
 	MONGO_CONNECTION=mongodb://mongoUser:mongoPass@127.0.0.1:27017/auth dotnet run -p ./app/runner

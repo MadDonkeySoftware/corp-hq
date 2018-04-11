@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+
+    <!-- https://github.com/xunit/xunit/issues/1573 -->
+    <RuntimeFrameworkVersion>2.0.5</RuntimeFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!--
+      Make sure any documentation comments which are included in code get checked for syntax during the build, but do
+      not report warnings for missing comments.
+
+      SA1652: Enable XML documentation output
+      SA1636: The file header copyright text must match the copyright text from the settings.
+      SA1600: Elements must be documented
+      CS1591: Missing XML comment for publicly visible type or member
+    -->
+    <!-- <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile> -->
+    <NoWarn>SA1652,SA1636,SA1600,CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+    <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\app\api\api.csproj" />
+    <ProjectReference Include="..\..\..\app\common\common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
+
+</Project>

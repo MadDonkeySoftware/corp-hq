@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Model
+namespace Api.Model.Data
 {
     using System.Diagnostics.CodeAnalysis;
     using Common.Model;
@@ -9,7 +9,7 @@ namespace Api.Model
 
     /// <summary>
     /// A class representing a user inside of the system.
-    /// </summary>
+    /// </summary>:w
     public class User : MongoBase
     {
         /// <summary>
