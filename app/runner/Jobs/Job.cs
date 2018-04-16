@@ -67,8 +67,7 @@ namespace Runner.Jobs
                 this.jobSpecCollection.UpdateOne(
                     Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobUuid),
                     Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Failed).Set(j => j.EndTimestamp, DateTime.Now));
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                this.DumpException(ex);
             }
         }
 
@@ -116,6 +115,32 @@ namespace Runner.Jobs
         /// The main body for the job being run.
         /// </summary>
         protected abstract void Work();
+
+        private void DumpException(Exception ex, int level = 1)
+        {
+            const string divider = "==================";
+            if (level == 1)
+            {
+                Console.WriteLine(divider);
+            }
+            else
+            {
+                Console.WriteLine();
+            }
+
+            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.StackTrace);
+
+            if (ex.InnerException != null)
+            {
+                this.DumpException(ex.InnerException, ++level);
+            }
+
+            if (level == 1)
+            {
+                Console.WriteLine(divider);
+            }
+        }
     }
 
     /// <summary>
