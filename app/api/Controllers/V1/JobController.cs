@@ -52,7 +52,7 @@ namespace Api.Controllers.V1
         [HttpGet("status/{jobUuid}")]
         public IActionResult GetStatus(string jobUuid)
         {
-            var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpecLite>("corp-hq", CollectionNames.Jobs);
+            var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpecLite>(CollectionNames.Jobs);
             var status = jobCol.Where(j => j.Uuid == jobUuid).Select(j => j.Status).FirstOrDefault();
 
             if (string.IsNullOrEmpty(status))
@@ -73,7 +73,7 @@ namespace Api.Controllers.V1
         [HttpGet("{jobUuid}")]
         public IActionResult Get(string jobUuid)
         {
-            var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs);
+            var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpec<dynamic>>(CollectionNames.Jobs);
             var jobSpec = jobCol.Where(j => j.Uuid == jobUuid).Select(j => new { Status = j.Status, Type = j.Type, Start = j.StartTimestamp, End = j.EndTimestamp }).FirstOrDefault();
 
             if (jobSpec == null)
@@ -83,7 +83,7 @@ namespace Api.Controllers.V1
                 return this.NotFound(respData);
             }
 
-            var messagesCol = this.dbFactory.GetCollectionAsQueryable<JobMessage>("corp-hq", CollectionNames.JobMessages);
+            var messagesCol = this.dbFactory.GetCollectionAsQueryable<JobMessage>(CollectionNames.JobMessages);
             var messages = messagesCol.Where(m => m.JobUuid == jobUuid).OrderBy(x => x.Timestamp).Select(m => m.Message).ToList();
 
             var details = new JobDetails
@@ -115,7 +115,7 @@ namespace Api.Controllers.V1
         {
             this.logger.LogDebug(1001, "Adding new job to the queue.");
             var newJobUuid = Guid.NewGuid();
-            var col = this.dbFactory.GetCollection<JobSpec<string>>("corp-hq", CollectionNames.Jobs);
+            var col = this.dbFactory.GetCollection<JobSpec<string>>(CollectionNames.Jobs);
 
             var messages = VerifyJobType(jobDetails.JobType);
             if (messages.Count() > 0)

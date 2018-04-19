@@ -44,7 +44,7 @@ namespace Runner.Jobs
             var result = Client.GetWithReties(uri);
             var regions = JsonConvert.DeserializeObject<List<int>>(result);
 
-            var regionCol = DbFactory.GetCollection<Region>("corp-hq", CollectionNames.Regions);
+            var regionCol = DbFactory.GetCollection<Region>(CollectionNames.Regions);
             foreach (var regionId in regions)
             {
                 this.AddMessage("Fetching data for region: {0}.", regionId);

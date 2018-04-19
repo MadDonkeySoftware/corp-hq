@@ -192,7 +192,7 @@ namespace ApiTests.Controllers
         public void CorrectJobStatus(string jobUuid, IQueryable<JobSpecLite> queryable, int expectedStatus, JobStatus expectedData)
         {
             // Arrange
-            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<JobSpecLite>("corp-hq", CollectionNames.Jobs, null, null)).Returns(queryable);
+            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<JobSpecLite>(CollectionNames.Jobs, null, null, null)).Returns(queryable);
 
             // Act
             var result = (ObjectResult)this.Controller.GetStatus(jobUuid);
@@ -213,8 +213,8 @@ namespace ApiTests.Controllers
             JobDetails expectedData)
         {
             // Arrange
-            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs, null, null)).Returns(jobsQueryable);
-            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<JobMessage>("corp-hq", CollectionNames.JobMessages, null, null)).Returns(messagesQueryable);
+            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<JobSpec<dynamic>>(CollectionNames.Jobs, null, null, null)).Returns(jobsQueryable);
+            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<JobMessage>(CollectionNames.JobMessages, null, null, null)).Returns(messagesQueryable);
 
             // Act
             var result = (ObjectResult)this.Controller.Get(jobUuid);
@@ -234,7 +234,7 @@ namespace ApiTests.Controllers
             var mockRabbitConnection = new Mock<IConnection>();
             var mockRabbitChannel = new Mock<IModel>();
 
-            this.dbFactoryMock.Setup(x => x.GetCollection<JobSpec<string>>("corp-hq", CollectionNames.Jobs, null)).Returns(mockCollection.Object);
+            this.dbFactoryMock.Setup(x => x.GetCollection<JobSpec<string>>(CollectionNames.Jobs, null, null)).Returns(mockCollection.Object);
             this.connectionFactoryMock.Setup(x => x.CreateConfiguredConnection()).Returns(mockRabbitConnection.Object);
             mockRabbitConnection.Setup(x => x.CreateModel()).Returns(mockRabbitChannel.Object);
 

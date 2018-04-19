@@ -31,7 +31,7 @@ namespace Api.Model.Data
                     if (rabbitSettings == null)
                     {
                         var dbFactory = new DbFactory();
-                        var settingsCol = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>("corp-hq", CollectionNames.Settings);
+                        var settingsCol = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>(CollectionNames.Settings);
                         var settings = settingsCol.AsQueryable().Where(s => s.Key == "rabbitConnection").First().Value;
                         rabbitSettings = settings;
                     }
