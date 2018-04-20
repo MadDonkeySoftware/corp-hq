@@ -23,24 +23,27 @@ namespace Runner
     /// </summary>
     public static class JobFactory
     {
+        private static readonly IDbFactory DbFactory = new DbFactory();
+
         /// <summary>
         /// Creates a new IJob instance for the appropriate job type.
         /// </summary>
         /// <param name="jobSpec">The job specification to initialize the job for.</param>
+        /// <param name="dbFactory">An option DbFactory to use with the new job.</param>
         /// <returns>An instance of a job ready to be started.</returns>
-        public static IJob AcquireJob(JobSpecLite jobSpec)
+        public static IJob AcquireJob(JobSpecLite jobSpec, IDbFactory dbFactory = null)
         {
             IJob job;
             switch (jobSpec.Type)
             {
                 case JobTypes.ApplyDbIndexes:
-                    job = new CreateMongoIndexes(jobSpec.Uuid);
+                    job = new CreateMongoIndexes(jobSpec.Uuid, dbFactory ?? DbFactory);
                     break;
                 case JobTypes.ImportMapData:
-                    job = new ImportMapData(jobSpec.Uuid);
+                    job = new ImportMapData(jobSpec.Uuid, dbFactory ?? DbFactory);
                     break;
                 case JobTypes.ImportMarketData:
-                    job = new ImportMarketData(jobSpec.Uuid);
+                    job = new ImportMarketData(jobSpec.Uuid, dbFactory ?? DbFactory);
                     break;
                 default:
                     job = null;

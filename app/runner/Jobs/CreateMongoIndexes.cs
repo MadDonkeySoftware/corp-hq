@@ -10,10 +10,15 @@ namespace Runner.Jobs
     /// <summary>
     /// Job for creating the mongo indexes
     /// </summary>
-    internal class CreateMongoIndexes : Job
+    public class CreateMongoIndexes : Job
     {
-        public CreateMongoIndexes(string jobUuid)
-            : base(jobUuid)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateMongoIndexes"/> class.
+        /// </summary>
+        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="dbFactory">The dbFactory for this job to use.</param>
+        public CreateMongoIndexes(string jobUuid, IDbFactory dbFactory)
+            : base(jobUuid, dbFactory)
         {
         }
 
@@ -32,7 +37,7 @@ namespace Runner.Jobs
 
         private void CreateRunnersIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>(CollectionNames.Runners);
+            var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.Runners);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -40,7 +45,7 @@ namespace Runner.Jobs
 
         private void CreateJobsIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>(CollectionNames.Jobs);
+            var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.Jobs);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -48,7 +53,7 @@ namespace Runner.Jobs
 
         private void CreateJobMessagesIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>(CollectionNames.JobMessages);
+            var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.JobMessages);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -56,7 +61,7 @@ namespace Runner.Jobs
 
         private void CreateMarketOrdersIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>(CollectionNames.MarketOrders);
+            var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.MarketOrders);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -64,7 +69,7 @@ namespace Runner.Jobs
 
         private void CreateSessionIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>(CollectionNames.Sessions);
+            var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.Sessions);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
