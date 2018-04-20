@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Extensions
+namespace Api.Model.Data
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -11,14 +11,18 @@ namespace Api.Extensions
     using RabbitMQ.Client;
 
     /// <summary>
-    /// Extension methods for RabbitMQ.Client.ConnectionFactory
+    /// A connection factory that knows how to get its connection settings from Mongo.
     /// </summary>
-    public static class ConnectionFactoryExtensions
+    public class SmartConnectionFactory : ConnectionFactory, ISmartConnectionFactory
     {
         private static readonly object Padlock = new object();
         private static Common.Model.RabbitMQ.Root rabbitSettings;
 
-        private static Common.Model.RabbitMQ.Root RabbitSettings
+        /// <summary>
+        /// Gets the root rabbit connection settings.
+        /// </summary>
+        /// <returns>The root settings element.</returns>
+        public Common.Model.RabbitMQ.Root RabbitSettings
         {
             get
             {
@@ -42,15 +46,14 @@ namespace Api.Extensions
         /// returned by the EndpointResolverFactory. This uses the connection settings
         /// present in the mongo database.
         /// </summary>
-        /// <param name="factory">The factory being extended</param>
         /// <returns>A new IConnection to the RabbitMQ broker.</returns>
-        public static IConnection CreateConfiguredConnection(this ConnectionFactory factory)
+        public IConnection CreateConfiguredConnection()
         {
-            factory.UserName = RabbitSettings.Username;
-            factory.Password = RabbitSettings.Password;
-            var hosts = RabbitSettings.Hosts.Select(h => h.Address).ToList();
+            this.UserName = this.RabbitSettings.Username;
+            this.Password = this.RabbitSettings.Password;
+            var hosts = this.RabbitSettings.Hosts.Select(h => h.Address).ToList();
 
-            return factory.CreateConnection(hosts);
+            return this.CreateConnection(hosts);
         }
     }
 }

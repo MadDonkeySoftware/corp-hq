@@ -1,0 +1,9 @@
+{
+    "settings": {
+        "documentationRules": {
+            "xmlHeader": false,
+            "companyName": "MadDonkeySoftware",
+            "copyrightText": "Copyright (c) {companyName}."
+        }
+    }
+}

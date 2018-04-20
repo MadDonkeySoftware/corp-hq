@@ -6,7 +6,7 @@ namespace Api
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-
+    using Api.Model.Data;
     using Common.Data;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -56,11 +56,14 @@ namespace Api
             var connString = new MongoUrl(Environment.GetEnvironmentVariable("MONGO_CONNECTION"));
             DbFactory.SetClient(new MongoClient(connString));
 
-            var rabbitConnectionFactory = new ConnectionFactory() { HostName = "localhost", UserName = "rabbitmq", Password = "rabbitmq" };
+            /*
+            var rabbitConnectionFactory = new SmartConnectionFactory() { HostName = "localhost", UserName = "rabbitmq", Password = "rabbitmq" };
+            services.AddSingleton<ISmartConnectionFactory>(rabbitConnectionFactory);
+            */
 
             // Add application services
             services.AddSingleton<IDbFactory, DbFactory>();
-            services.AddSingleton<ConnectionFactory>(rabbitConnectionFactory);
+            services.AddSingleton<ISmartConnectionFactory, SmartConnectionFactory>();
         }
 
         /// <summary>

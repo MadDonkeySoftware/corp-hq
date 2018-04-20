@@ -9,6 +9,8 @@ namespace Api.Controllers.V1
     using System.Threading.Tasks;
     using Api.Extensions;
     using Api.Model;
+    using Api.Model.Data;
+    using Api.Model.Response;
     using Common;
     using Common.Data;
     using Common.Model;
@@ -27,7 +29,7 @@ namespace Api.Controllers.V1
     {
         private readonly ILogger logger;
         private readonly IDbFactory dbFactory;
-        private readonly ConnectionFactory connectionFactory;
+        private readonly ISmartConnectionFactory connectionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobController"/> class.
@@ -35,7 +37,7 @@ namespace Api.Controllers.V1
         /// <param name="logger">The logger in which to use.</param>
         /// <param name="dbFactory">The factory for DB connections.</param>
         /// <param name="factory">The factory for RabbitMQ connections.</param>
-        public JobController(ILogger<RegistrationController> logger, IDbFactory dbFactory, ConnectionFactory factory)
+        public JobController(ILogger<JobController> logger, IDbFactory dbFactory, ISmartConnectionFactory factory)
         {
             this.logger = logger;
             this.dbFactory = dbFactory;
@@ -48,15 +50,19 @@ namespace Api.Controllers.V1
         /// <param name="jobUuid">The job to get info on.</param>
         /// <returns>The details for the specified job.</returns>
         [HttpGet("status/{jobUuid}")]
-        public dynamic GetStatus(string jobUuid)
+        public IActionResult GetStatus(string jobUuid)
         {
-            var jobCol = this.dbFactory.GetCollection<JobSpecLite>("corp-hq", CollectionNames.Jobs);
-            var status = jobCol.AsQueryable().Where(j => j.Uuid == jobUuid).Select(j => j.Status).FirstOrDefault();
+            var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpecLite>("corp-hq", CollectionNames.Jobs);
+            var status = jobCol.Where(j => j.Uuid == jobUuid).Select(j => j.Status).FirstOrDefault();
 
-            return new
+            if (string.IsNullOrEmpty(status))
             {
-                status = status,
-            };
+                var response = new ApiResponse<JobStatus>();
+                response.Messages.Add("job Uuid not found");
+                return this.NotFound(response);
+            }
+
+            return this.Ok(new ApiResponse<JobStatus> { Result = new JobStatus { Status = status } });
         }
 
         /// <summary>
@@ -65,28 +71,35 @@ namespace Api.Controllers.V1
         /// <param name="jobUuid">The job to get info on.</param>
         /// <returns>The details for the specified job.</returns>
         [HttpGet("{jobUuid}")]
-        public dynamic Get(string jobUuid)
+        public IActionResult Get(string jobUuid)
         {
-            var jobCol = this.dbFactory.GetCollection<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs);
-            var jobSpec = jobCol.AsQueryable().Where(j => j.Uuid == jobUuid).Select(j => new { Status = j.Status, Type = j.Type, Start = j.StartTimestamp, End = j.EndTimestamp }).FirstOrDefault();
+            var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs);
+            var jobSpec = jobCol.Where(j => j.Uuid == jobUuid).Select(j => new { Status = j.Status, Type = j.Type, Start = j.StartTimestamp, End = j.EndTimestamp }).FirstOrDefault();
 
             if (jobSpec == null)
             {
-                return this.NotFound(new { message = "Not Found" });
+                var respData = new ApiResponse<JobDetails>();
+                respData.Messages.Add("Not Found");
+                return this.NotFound(respData);
             }
 
-            var messagesCol = this.dbFactory.GetCollection<JobMessage>("corp-hq", CollectionNames.JobMessages);
-            var messages = messagesCol.AsQueryable().Where(m => m.JobUuid == jobUuid).Select(m => m.Message).ToList();
+            var messagesCol = this.dbFactory.GetCollectionAsQueryable<JobMessage>("corp-hq", CollectionNames.JobMessages);
+            var messages = messagesCol.Where(m => m.JobUuid == jobUuid).OrderBy(x => x.Timestamp).Select(m => m.Message).ToList();
 
-            return new
+            var details = new JobDetails
             {
-                uuid = jobUuid,
-                status = jobSpec.Status,
-                type = jobSpec.Type,
-                startTimestamp = jobSpec.Start,
-                endTimestamp = jobSpec.End,
-                messages = messages
+                Uuid = jobUuid,
+                Status = jobSpec.Status,
+                Type = jobSpec.Type,
+                StartTimestamp = jobSpec.Start,
+                EndTimestamp = jobSpec.End,
             };
+            details.Messages.AddRange(messages);
+
+            return this.Ok(new ApiResponse<JobDetails>
+            {
+                Result = details
+            });
         }
 
         /// <summary>
@@ -98,7 +111,7 @@ namespace Api.Controllers.V1
         /// POST api/values
         /// </remarks>
         [HttpPost]
-        public ActionResult Post([FromBody]EnqueueJob jobDetails)
+        public IActionResult Post([FromBody]EnqueueJob jobDetails)
         {
             this.logger.LogDebug(1001, "Adding new job to the queue.");
             var newJobUuid = Guid.NewGuid();
@@ -107,7 +120,9 @@ namespace Api.Controllers.V1
             var messages = VerifyJobType(jobDetails.JobType);
             if (messages.Count() > 0)
             {
-                return this.BadRequest(new { messages = messages });
+                var details = new ApiResponse<JobCreated>();
+                details.Messages.AddRange(messages);
+                return this.BadRequest(details);
             }
 
             // TODO: Make Job expirary configurable via the settings db.
@@ -138,21 +153,17 @@ namespace Api.Controllers.V1
                     body: newJobUuid.ToByteArray());
             }
 
-            return this.Accepted(new { uuid = newJobUuid });
+            // TODO: Make base URL configurable.
+            var baseUrl = new Uri("http://127.0.0.1:5000/api/v1/job/");
+            var jobUrl = new Uri(baseUrl, newJobUuid.ToString());
+            return this.Created(jobUrl, new ApiResponse<JobCreated> { Result = new JobCreated { Uuid = newJobUuid } });
         }
 
         private static List<string> VerifyJobType(string jobType)
         {
-            // TODO: Find a better way to do this. Reflection maybe? Also, some job types will be restricted to certain users.
-            // Figure that out as well.
             var messages = new List<string>();
             Console.WriteLine("JobType" + jobType);
-            var availableTypes = new[]
-            {
-                JobTypes.ApplyDbIndexes,
-                JobTypes.ImportMapData,
-                JobTypes.ImportMarketData
-            };
+            var availableTypes = JobTypes.ToEnumerable();
 
             if (availableTypes.Contains(jobType))
             {

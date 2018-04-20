@@ -9,6 +9,7 @@ namespace Api.Controllers.V1
 
     using Api.Extensions;
     using Api.Model;
+    using Api.Model.Data;
     using Common.Data;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;

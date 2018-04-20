@@ -1,6 +1,6 @@
 // Copyright (c) MadDonkeySoftware
 
-namespace Api.Model
+namespace Api.Model.Data
 {
     using Common.Model;
     using MongoDB.Bson;
