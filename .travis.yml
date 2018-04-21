@@ -1,0 +1,12 @@
+language: csharp
+before_install:
+  - sudo apt update
+  - sudo apt install nodejs
+  - sudo apt install npm
+mono: none
+dotnet: 2.1.4
+script:
+  - dotnet build --no-incremental ./app/api
+  - dotnet build --no-incremental ./app/runner
+  - npm install --prefix ./app/ui
+  - npm run --prefix ./app/ui build
