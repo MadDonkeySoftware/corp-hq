@@ -36,7 +36,7 @@ namespace Runner.Jobs
         {
             this.AddMessage("Starting market data import.");
 
-            var jobCol = DbFactory.GetCollection<JobSpec<string>>("corp-hq", CollectionNames.Jobs);
+            var jobCol = DbFactory.GetCollection<JobSpec<string>>(CollectionNames.Jobs);
             var jobData = jobCol.AsQueryable().Where(j => j.Uuid == this.JobUuid).Select(j => j.Data).FirstOrDefault();
 
             if (string.IsNullOrEmpty(jobData))
@@ -54,7 +54,7 @@ namespace Runner.Jobs
         {
             Client.DefaultRequestHeaders.Accept.Clear();
             Client.DefaultRequestHeaders.Add("Accept", "application/json");
-            this.marketOrderCol = DbFactory.GetCollection<MarketOrder>("corp-hq", CollectionNames.MarketOrders);
+            this.marketOrderCol = DbFactory.GetCollection<MarketOrder>(CollectionNames.MarketOrders);
 
             foreach (var id in jobData.MarketTypeIds)
             {

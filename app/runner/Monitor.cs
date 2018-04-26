@@ -23,7 +23,6 @@ namespace Runner
     /// </summary>
     public class Monitor : IDisposable
     {
-        private const string DbName = "corp-hq";
         private static readonly object Padlock = new object();
         private static Monitor instance = null;
         private static IConnectionFactory connectionFactory;
@@ -74,7 +73,7 @@ namespace Runner
         /// </summary>
         public void Start()
         {
-            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>(DbName, CollectionNames.Settings);
+            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>(CollectionNames.Settings);
             var settings = settingsCollection.AsQueryable().Where(s => s.Key == "rabbitConnection").First().Value;
 
             connectionFactory.UserName = settings.Username;
@@ -95,7 +94,7 @@ namespace Runner
                 arguments: null);
 
             // Add ourself to the runner collection
-            var col = dbFactory.GetCollection<TaskRunner>(DbName, CollectionNames.Runners);
+            var col = dbFactory.GetCollection<TaskRunner>(CollectionNames.Runners);
             col.InsertOne(new TaskRunner { Name = this.controlQueueName, ExpireAt = DateTime.Now.AddMinutes(settings.RecordTtl) });
 
             // Setup heartbeat
@@ -175,7 +174,7 @@ namespace Runner
                 Thread.Sleep(1000);
             }
 
-            var col = dbFactory.GetCollection<TaskRunner>(DbName, CollectionNames.Runners);
+            var col = dbFactory.GetCollection<TaskRunner>(CollectionNames.Runners);
             col.FindOneAndDelete(r => r.Name == this.controlQueueName);
             this.Dispose();
         }
@@ -188,7 +187,7 @@ namespace Runner
                 Console.WriteLine(" [x] Received  {0}", uuid);
 
                 /* TODO: Actual job processing logic here. */
-                var col = dbFactory.GetCollection<JobSpec<object>>(DbName, CollectionNames.Jobs);
+                var col = dbFactory.GetCollection<JobSpec<object>>(CollectionNames.Jobs);
 
                 var jobSpec = col.AsQueryable().Where(j => j.Uuid == uuid)
                                                .Select(j => new JobSpecLite { Uuid = j.Uuid, Type = j.Type })

@@ -32,7 +32,7 @@ namespace Runner.Jobs
 
         private void CreateRunnersIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.Runners);
+            var col = DbFactory.GetCollection<dynamic>(CollectionNames.Runners);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -40,7 +40,7 @@ namespace Runner.Jobs
 
         private void CreateJobsIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.Jobs);
+            var col = DbFactory.GetCollection<dynamic>(CollectionNames.Jobs);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -48,7 +48,7 @@ namespace Runner.Jobs
 
         private void CreateJobMessagesIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.JobMessages);
+            var col = DbFactory.GetCollection<dynamic>(CollectionNames.JobMessages);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -56,7 +56,7 @@ namespace Runner.Jobs
 
         private void CreateMarketOrdersIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.MarketOrders);
+            var col = DbFactory.GetCollection<dynamic>(CollectionNames.MarketOrders);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
@@ -64,7 +64,7 @@ namespace Runner.Jobs
 
         private void CreateSessionIndexes()
         {
-            var col = DbFactory.GetCollection<dynamic>("corp-hq", CollectionNames.Sessions);
+            var col = DbFactory.GetCollection<dynamic>(CollectionNames.Sessions);
             col.Indexes.CreateOne(
                 Builders<dynamic>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });

@@ -58,7 +58,7 @@ namespace Api.Controllers.V1
             }
 
             this.logger.LogDebug(1001, "Authenticating user.");
-            var userCol = this.dbFactory.GetCollection<User>("corp-hq", CollectionNames.Users);
+            var userCol = this.dbFactory.GetCollection<User>(CollectionNames.Users);
             var user = userCol.AsQueryable<User>().Where(u => u.Username == authDetails.Username).FirstOrDefault();
 
             if (user != null)
@@ -69,7 +69,7 @@ namespace Api.Controllers.V1
 
                 if (SecurityHelpers.CompareByteArrays(hashed, submittedHash))
                 {
-                    var sessionCol = this.dbFactory.GetCollection<UserSession>("corp-hq", CollectionNames.Sessions);
+                    var sessionCol = this.dbFactory.GetCollection<UserSession>(CollectionNames.Sessions);
                     var token = SecurityHelpers.GetToken();
                     var remote = this.HttpContext.Connection.RemoteIpAddress.ToString();
 

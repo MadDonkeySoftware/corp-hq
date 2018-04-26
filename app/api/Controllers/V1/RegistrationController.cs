@@ -61,7 +61,7 @@ namespace Api.Controllers.V1
             }
 
             // get Action specific errors
-            var col = this.dbFactory.GetCollection<User>("corp-hq", "users");
+            var col = this.dbFactory.GetCollection<User>(CollectionNames.Users);
             errors = ValidateUserRegistrationBody(newUser, col);
             if (errors.Any())
             {

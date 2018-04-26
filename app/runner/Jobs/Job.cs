@@ -46,8 +46,8 @@ namespace Runner.Jobs
         {
             try
             {
-                this.messageCollection = DbFactory.GetCollection<JobMessage>("corp-hq", CollectionNames.JobMessages);
-                this.jobSpecCollection = DbFactory.GetCollection<JobSpec<dynamic>>("corp-hq", CollectionNames.Jobs);
+                this.messageCollection = DbFactory.GetCollection<JobMessage>(CollectionNames.JobMessages);
+                this.jobSpecCollection = DbFactory.GetCollection<JobSpec<dynamic>>(CollectionNames.Jobs);
                 this.Initialize();
                 this.Work();
                 this.Conclude();
