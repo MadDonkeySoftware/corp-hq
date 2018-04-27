@@ -15,10 +15,8 @@ namespace Runner.Jobs
     /// <summary>
     /// Base Job class
     /// </summary>
-    internal abstract class Job : IJob
+    public abstract class Job : IJob
     {
-        protected static readonly DbFactory DbFactory = new DbFactory();
-
         private IMongoCollection<JobMessage> messageCollection;
         private IMongoCollection<JobSpec<dynamic>> jobSpecCollection;
 
@@ -26,13 +24,25 @@ namespace Runner.Jobs
         /// Initializes a new instance of the <see cref="Job"/> class.
         /// </summary>
         /// <param name="jobUuid">The job uuid this is running for.</param>
-        public Job(string jobUuid)
+        /// <param name="dbFactory">The dbFactory for this job to use.</param>
+        public Job(string jobUuid, IDbFactory dbFactory)
         {
             this.JobUuid = jobUuid;
+            this.DbFactory = dbFactory;
             this.Messages = new List<string>();
         }
 
+        /// <summary>
+        /// Gets the internal job UUID for this job.
+        /// </summary>
+        /// <returns>The job UUID.</returns>
         protected internal string JobUuid { get; private set; }
+
+        /// <summary>
+        /// Gets the configured db factory.
+        /// </summary>
+        /// <returns>The db factory.</returns>
+        protected IDbFactory DbFactory { get; private set; }
 
         /// <summary>
         /// Gets the list of all messages associated with this job.
@@ -46,8 +56,8 @@ namespace Runner.Jobs
         {
             try
             {
-                this.messageCollection = DbFactory.GetCollection<JobMessage>(CollectionNames.JobMessages);
-                this.jobSpecCollection = DbFactory.GetCollection<JobSpec<dynamic>>(CollectionNames.Jobs);
+                this.messageCollection = this.DbFactory.GetCollection<JobMessage>(CollectionNames.JobMessages);
+                this.jobSpecCollection = this.DbFactory.GetCollection<JobSpec<dynamic>>(CollectionNames.Jobs);
                 this.Initialize();
                 this.Work();
                 this.Conclude();
@@ -108,15 +118,24 @@ namespace Runner.Jobs
         protected abstract void Work();
     }
 
+    /// <summary>
+    /// Base Job class
+    /// </summary>
+    /// <typeparam name="T">The type for the Data property.</typeparam>y
     [SuppressMessage(
         "StyleCop.CSharp.MaintainabilityRules",
         "SA1402:FileMayOnlyContainASingleType",
         Justification = "No way to resolve this issue as rules confict with one another.")]
-    internal abstract class Job<T> : Job, IJob<T>
+    public abstract class Job<T> : Job, IJob<T>
         where T : class
     {
-        public Job(string jobUuid)
-            : base(jobUuid)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Job{T}"/> class.
+        /// </summary>
+        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="dbFactory">The dbFactory for this job to use.</param>
+        public Job(string jobUuid, IDbFactory dbFactory)
+            : base(jobUuid, dbFactory)
         {
         }
 

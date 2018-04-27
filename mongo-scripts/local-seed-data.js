@@ -1,7 +1,7 @@
 var rabbitSettings = {
     hosts: [
-        {address: "localhost"},
-        {address: "rabbit"}
+        // {address: "rabbit"},
+        {address: "localhost"}
     ],
     username: "rabbitmq",
     password: "rabbitmq",
@@ -10,3 +10,4 @@ var rabbitSettings = {
 };
 
 db.settings.replaceOne({ key: "rabbitConnection" }, { key: "rabbitConnection", value: rabbitSettings}, {upsert: true});
+db.settings.replaceOne({ key: "eveDataUri" }, { key: "eveDataUri", value: "https://esi.tech.ccp.is/latest"}, {upsert: true});

@@ -19,13 +19,18 @@ namespace Runner.Jobs
     /// <summary>
     /// Job for creating the mongo indexes
     /// </summary>
-    internal class ImportMarketData : Job
+    public class ImportMarketData : EveDataJob
     {
         private static readonly SmartHttpClient Client = new SmartHttpClient();
         private IMongoCollection<MarketOrder> marketOrderCol;
 
-        public ImportMarketData(string jobUuid)
-            : base(jobUuid)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportMarketData"/> class.
+        /// </summary>
+        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="dbFactory">The dbFactory for this job to use.</param>
+       public ImportMarketData(string jobUuid, IDbFactory dbFactory)
+            : base(jobUuid, dbFactory)
         {
         }
 
@@ -36,7 +41,7 @@ namespace Runner.Jobs
         {
             this.AddMessage("Starting market data import.");
 
-            var jobCol = DbFactory.GetCollection<JobSpec<string>>(CollectionNames.Jobs);
+            var jobCol = this.DbFactory.GetCollection<JobSpec<string>>(CollectionNames.Jobs);
             var jobData = jobCol.AsQueryable().Where(j => j.Uuid == this.JobUuid).Select(j => j.Data).FirstOrDefault();
 
             if (string.IsNullOrEmpty(jobData))
@@ -54,7 +59,7 @@ namespace Runner.Jobs
         {
             Client.DefaultRequestHeaders.Accept.Clear();
             Client.DefaultRequestHeaders.Add("Accept", "application/json");
-            this.marketOrderCol = DbFactory.GetCollection<MarketOrder>(CollectionNames.MarketOrders);
+            this.marketOrderCol = this.DbFactory.GetCollection<MarketOrder>(CollectionNames.MarketOrders);
 
             foreach (var id in jobData.MarketTypeIds)
             {
@@ -70,12 +75,8 @@ namespace Runner.Jobs
 
             do
             {
-                var uri = new Uri(string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://esi.tech.ccp.is/latest/markets/{0}/orders?type_id={1}&page={2}",
-                    regionId,
-                    id,
-                    page));
+                var uri = this.CreateEndpoint(string.Format(
+                    CultureInfo.InvariantCulture, "/markets/{0}/orders?type_id={1}&page={2}", regionId, id, page));
                 var result = Client.GetWithReties(uri);
                 var marketOrders = JsonConvert.DeserializeObject<List<EveMarketOrder>>(result);
 

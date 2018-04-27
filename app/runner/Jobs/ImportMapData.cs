@@ -16,12 +16,17 @@ namespace Runner.Jobs
     /// <summary>
     /// Job for creating the mongo indexes
     /// </summary>
-    internal class ImportMapData : Job
+    public class ImportMapData : EveDataJob
     {
         private static readonly SmartHttpClient Client = new SmartHttpClient();
 
-        public ImportMapData(string jobUuid)
-            : base(jobUuid)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportMapData"/> class.
+        /// </summary>
+        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="dbFactory">The dbFactory for this job to use.</param>
+        public ImportMapData(string jobUuid, IDbFactory dbFactory)
+            : base(jobUuid, dbFactory)
         {
         }
 
@@ -40,15 +45,15 @@ namespace Runner.Jobs
             Client.DefaultRequestHeaders.Accept.Clear();
             Client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-            var uri = new Uri("https://esi.tech.ccp.is/latest/universe/regions");
+            var uri = this.CreateEndpoint("/universe/regions");
             var result = Client.GetWithReties(uri);
             var regions = JsonConvert.DeserializeObject<List<int>>(result);
 
-            var regionCol = DbFactory.GetCollection<Region>(CollectionNames.Regions);
+            var regionCol = this.DbFactory.GetCollection<Region>(CollectionNames.Regions);
             foreach (var regionId in regions)
             {
                 this.AddMessage("Fetching data for region: {0}.", regionId);
-                uri = new Uri(string.Concat("https://esi.tech.ccp.is/latest/universe/regions/", regionId));
+                uri = this.CreateEndpoint(string.Concat("/universe/regions/", regionId));
                 result = Client.GetWithReties(uri);
                 var regionDetails = JsonConvert.DeserializeObject<RegionDetailsData>(result);
 

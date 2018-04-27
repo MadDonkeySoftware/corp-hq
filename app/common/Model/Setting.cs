@@ -9,7 +9,7 @@ namespace Common.Model
     /// <summary>
     /// A sample class
     /// </summary>
-    public class Setting<T> : MongoBase where T : MongoBase
+    public class Setting<T> : MongoBase
     {
         /// <summary>
         /// Gets or sets the key.

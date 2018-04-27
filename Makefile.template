@@ -9,6 +9,9 @@ build-api-tests:  ## Builds the API tests.
 build-runner:  ## Builds the API displaying any analytics violations.
 	dotnet build --no-incremental ./app/runner
 
+build-runner-tests:  ## Builds the API tests.
+	dotnet build --no-incremental ./tests/unit/runnertest
+
 build-ui:  ## Builds the vue web site to deployable assets
 	npm run --prefix ./app/ui build
 
@@ -32,9 +35,6 @@ publish-api:  ## Publishes the API displaying any analytics violations.
 publish-runner:  ## Publishes the runner displaying any analytics violations.
 	dotnet publish --configuration Release ./app/runner
 
-seed-data:  ## Executes the seed data against the local mongo database.
-	mongo 127.0.0.1/corp-hq ./mongo-scripts/local-seed-data.js
-
 run-api: build-api  ## Builds the API then runs it.
 	MONGO_CONNECTION=mongodb://mongoUser:mongoPass@127.0.0.1:27017/auth dotnet run -p ./app/api
 
@@ -45,5 +45,12 @@ run-api-tests: build-api-tests  ## Builds the API tests then runs them
 run-runner: build-runner  ## Builds the API then runs it.
 	MONGO_CONNECTION=mongodb://mongoUser:mongoPass@127.0.0.1:27017/auth dotnet run -p ./app/runner
 
+run-runner-tests: build-runner-tests  ## Builds the API tests then runs them
+	# This is super hacky but dotnet 2.0 doesn't support xunit as a global command.
+	cd ./tests/unit/runnertest; dotnet xunit; cd ../../..;
+
 run-ui:  ## Builds the UI then runs it.
 	npm run --prefix ./app/ui dev
+
+seed-data:  ## Executes the seed data against the local mongo database.
+	mongo 127.0.0.1/corp-hq ./mongo-scripts/local-seed-data.js
