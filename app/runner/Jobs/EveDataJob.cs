@@ -42,7 +42,7 @@ namespace Runner.Jobs
             if (baseEveDataEndpoint == null)
             {
                 var setting = this.DbFactory.GetCollectionAsQueryable<Common.Model.Setting<string>>(
-                    "corp-hq", CollectionNames.Settings).First(x => x.Key == "eveDataUri");
+                    CollectionNames.Settings).First(x => x.Key == "eveDataUri");
                 baseEveDataEndpoint = new Uri(setting.Value.EndsWith("/", StringComparison.InvariantCulture) ? setting.Value : setting.Value + "/");
             }
 

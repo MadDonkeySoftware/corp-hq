@@ -1,0 +1,14 @@
+{
+  "name": "eve-api-mock",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "eve-swagger": "json-server --watch eve-swagger.json"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "json-server": "^0.12.2"
+  }
+}

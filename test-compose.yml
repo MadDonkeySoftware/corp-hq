@@ -1,0 +1,69 @@
+version: '3.5'
+services:
+    test-ui:
+        container_name: "test-ui"
+        build: ./app/ui
+        image: "corp-hq-ui"
+        networks:
+            - test-network
+    test-api:
+        container_name: "test-api"
+        build: ./app/api
+        image: "corp-hq-api"
+        environment:
+            - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+        links:
+            - "test-mongodb:mongo"
+            - "test-rabbitmq:rabbit"
+        networks:
+            - test-network
+    test-runner:
+        container_name: "test-runner"
+        build: ./app/runner
+        image: "corp-hq-runner"
+        environment:
+            - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+        links:
+            - "test-mongodb:mongo"
+            - "test-rabbitmq:rabbit"
+        networks:
+            - test-network
+    test-eve-api:
+        container_name: "test-eve-api"
+        image: node:8
+        volumes:
+            - ./tests/mock-services/eve-api:/var/mock-scripts
+        working_dir: /var/mock-scripts
+        networks:
+            - test-network
+        command: bash -c "npm install; node server.js"
+    test-mongodb:
+        container_name: "test-mongodb"
+        image: mongo:3.6.3
+        environment:
+            - MONGO_DATA_DIR=/data/db
+            - MONGO_LOG_DIR=/dev/null
+        volumes:
+            - ./mongo-scripts:/var/scripts
+        networks:
+            - test-network
+        command: mongod --smallfiles --logpath=/dev/null  # -auth  # --quiet
+    test-rabbitmq:
+        container_name: "test-rabbitmq"
+        image: rabbitmq:3.7.4-management-alpine
+        hostname: "rabbitmq"
+        environment:
+            RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+            RABBITMQ_DEFAULT_USER: "rabbitmq"
+            RABBITMQ_DEFAULT_PASS: "rabbitmq"
+            RABBITMQ_DEFAULT_VHOST: "/"
+        volumes:
+            - ./docker-compose-files/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+        labels:
+            NAME: "rabbitmq1"
+        networks:
+            - test-network
+
+networks:
+    test-network:
+        name: test-network

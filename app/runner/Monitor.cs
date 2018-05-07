@@ -15,6 +15,7 @@ namespace Runner
     using Newtonsoft.Json;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using RabbitMQ.Client.Exceptions;
     using Runner.Jobs;
     using Runner.Model;
 
@@ -79,7 +80,24 @@ namespace Runner
             connectionFactory.UserName = settings.Username;
             connectionFactory.Password = settings.Password;
 
-            this.connection = connectionFactory.CreateConnection(settings.Hosts.Select(h => h.Address).ToList());
+            var timeout = DateTime.Now.AddSeconds(30);
+            do
+            {
+                try
+                {
+                    this.connection = connectionFactory.CreateConnection(settings.Hosts.Select(h => h.Address).ToList());
+                }
+                catch (BrokerUnreachableException)
+                {
+                }
+            }
+            while (DateTime.Now < timeout && this.connection == null);
+
+            if (this.connection == null)
+            {
+                throw new TimeoutException("Could not connect to RabbitMQ instance.");
+            }
+
             this.channel = this.connection.CreateModel();
 
             // Get queue name for runner-specific purposes.
