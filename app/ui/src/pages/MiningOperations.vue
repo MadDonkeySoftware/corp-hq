@@ -6,10 +6,10 @@
 
 <script>
 export default {
-  name: 'Dashboard',
+  name: 'MiningOperations',
   data () {
     return {
-      msg: 'Dashboard Stub'
+      msg: 'Mining Operations Stub'
     }
   },
   methods: {
