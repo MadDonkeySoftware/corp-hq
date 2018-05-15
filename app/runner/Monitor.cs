@@ -99,6 +99,7 @@ namespace Runner
             }
 
             this.channel = this.connection.CreateModel();
+            this.channel.BasicQos(0, 1, false);
 
             // Get queue name for runner-specific purposes.
             this.controlQueueName = this.channel.QueueDeclare().QueueName;
