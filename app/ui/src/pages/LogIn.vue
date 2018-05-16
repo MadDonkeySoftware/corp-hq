@@ -48,6 +48,7 @@
 
 <script>
 import axios from 'axios'
+import constants from '@/constants'
 
 export default {
   name: 'Register',
@@ -70,7 +71,7 @@ export default {
         }
         axios.post('http://127.0.0.1:5000/api/v1/authentication', data)
           .then(response => {
-            localStorage.setItem('token', response.data['token'])
+            Event.fire(constants.authTokenUpdated, response.data['token'])
             this.$router.push({name: 'Dashboard', params: { userId: 123 }})
           })
           .catch(e => {
