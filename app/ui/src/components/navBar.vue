@@ -20,10 +20,10 @@
         <div class="navbar-item">
           <div class="field is-grouped">
             <p class="control">
-              <button class="button" v-on:click="navToLogIn">Log In</button>
+              <button class="button" v-on:click="navToLogIn">{{$t('logIn')}}</button>
             </p>
             <p class="control">
-              <button class="button" v-on:click="navToRegistration">Registration</button>
+              <button class="button" v-on:click="navToRegistration">{{$t('register')}}</button>
             </p>
           </div>
         </div>
