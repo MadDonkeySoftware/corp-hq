@@ -39,7 +39,7 @@ echo "-----------"
 echo "Sleeping then starting the tests."
 echo "-----------"
 sleep 2
-docker run -it -v $(pwd)/tests/behavior:/home/node/app -w="/home/node/app" --network="test-network" --name test-node node:8 bash -c "npm install; API_URL=http://test-api MONGO_URL=mongodb://test-mongodb:27017/auth npm run cucumber"
+docker run -it -v $(pwd)/tests/behavior:/home/node/app -w="/home/node/app" --network="test-network" --name test-node node:8 bash -c "npm install; API_URL=http://test-api MONGO_URL=mongodb://test-mongodb:27017/auth npm run cucumber -- --tags 'not @ignore'"
 EXIT_CODE="$(docker inspect --format='{{.State.ExitCode}}' test-node)"
 
 echo "-----------"
