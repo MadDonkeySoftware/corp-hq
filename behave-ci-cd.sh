@@ -1,5 +1,12 @@
 #!/bin/bash
 
+CORPHQ_BEHAVE_SLEEP="${CORPHQ_BEHAVE_SLEEP:-2}"
+echo "-----------"
+echo "Behaviorial tests running with a sleep value of $CORPHQ_BEHAVE_SLEEP seconds."
+echo "To change this value set the 'CORPHQ_BEHAVE_SLEEP' environment variable."
+echo "-----------"
+echo ""
+
 # Just make sure the containers are being build fresh
 docker-compose -f test-compose.yml down -v
 docker rm test-node -v
@@ -24,23 +31,24 @@ echo "-----------"
 docker-compose -f test-compose.yml up -d test-mongodb test-rabbitmq test-eve-api
 
 echo "-----------"
-echo "Sleep then seed the db with test data."
+echo "Sleeping $CORPHQ_BEHAVE_SLEEP seconds then seed the db with test data."
 echo "-----------"
-sleep 2
+sleep $CORPHQ_BEHAVE_SLEEP
 docker exec -it test-mongodb mongo 127.0.0.1:27017/corp-hq /var/scripts/test-seed-data.js
 
 echo "-----------"
-echo "Sleeping then starting the tested services."
+echo "Sleeping $CORPHQ_BEHAVE_SLEEP seconds then starting the tested services."
 echo "-----------"
-sleep 2
+sleep $CORPHQ_BEHAVE_SLEEP
 docker-compose -f test-compose.yml up -d test-runner test-api 
 
 echo "-----------"
-echo "Sleeping then starting the tests."
+echo "Sleeping $CORPHQ_BEHAVE_SLEEP seconds then starting the tests."
 echo "-----------"
-sleep 2
-docker run -it --rm -v $(pwd)/tests/behavior:/home/node/app -w="/home/node/app" --network="test-network" --name test-node node:8 bash -c "npm install; API_URL=http://test-api MONGO_URL=mongodb://test-mongodb:27017/auth npm run cucumber -- --tags 'not @ignore'"
+sleep $CORPHQ_BEHAVE_SLEEP
+docker run -it -v $(pwd)/tests/behavior:/home/node/app -w="/home/node/app" -e CORPHQ_BEHAVE_STEP_TIMEOUT=$CORPHQ_BEHAVE_STEP_TIMEOUT --network="test-network" --name test-node node:8 bash -c "npm install; API_URL=http://test-api MONGO_URL=mongodb://test-mongodb:27017/auth npm run cucumber -- --tags 'not @ignore'"
 EXIT_CODE="$(docker inspect --format='{{.State.ExitCode}}' test-node)"
+docker rm test-node -v
 
 echo "-----------"
 echo "Shutdown the services and clean up dangling volumes."
