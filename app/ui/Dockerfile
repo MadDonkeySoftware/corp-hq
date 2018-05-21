@@ -1,6 +1,13 @@
-FROM nginx:1.13.9-alpine
+FROM node:9
 LABEL Author="MadDonkeySoftware"
 LABEL WebSite="http://github.com/MadDonkeySoftware/corp-hq"
 
-# Install compiled app
-COPY ./dist /usr/share/nginx/html
+EXPOSE 8080
+
+WORKDIR /app
+
+# Copy over the files we need for build / run
+COPY . ./
+
+RUN ["npm", "install"]
+ENTRYPOINT ["npm", "run", "prod"]

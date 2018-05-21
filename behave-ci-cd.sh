@@ -17,8 +17,6 @@ echo "Build the applications before we create docker images for them."
 echo "-----------"
 dotnet publish --configuration Release ./app/api
 dotnet publish --configuration Release ./app/runner
-npm install --prefix ./app/ui
-npm run --prefix ./app/ui build
 
 echo "-----------"
 echo "Build the images we will eventually test."

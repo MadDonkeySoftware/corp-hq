@@ -78,6 +78,7 @@
 
 <script>
 import axios from 'axios'
+import utils from '@/utils'
 
 export default {
   name: 'Register',
@@ -104,7 +105,7 @@ export default {
           email: this.email,
           agreeWithTermsAndConditions: this.agreeWithTermsAndConditions
         }
-        axios.post('http://127.0.0.1:5000/api/v1/registration', data)
+        axios.post(utils.buildApiUrl('/api/v1/registration'), data)
           .then(response => {
             this.errors.push('Success!')
           })

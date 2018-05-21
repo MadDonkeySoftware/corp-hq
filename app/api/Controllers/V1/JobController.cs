@@ -153,7 +153,7 @@ namespace Api.Controllers.V1
                     body: newJobUuid.ToByteArray());
             }
 
-            // TODO: Make base URL configurable.
+            // TODO: Make base URL configurable. -- CORPHQ_API_URL
             var baseUrl = new Uri("http://127.0.0.1:5000/api/v1/job/");
             var jobUrl = new Uri(baseUrl, newJobUuid.ToString());
             return this.Created(jobUrl, new ApiResponse<JobCreated> { Result = new JobCreated { Uuid = newJobUuid } });
