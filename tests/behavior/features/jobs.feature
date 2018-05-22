@@ -3,6 +3,7 @@ Feature: Jobs
   Verify that jobs schedule and process completely
 
   Scenario: Schedule apply indexes
+    Given I already have an auth token expiring in 10 seconds
     When I schedule the "apply indexes" job
     And wait for 1 seconds
     Then the response code is 201
@@ -11,6 +12,7 @@ Feature: Jobs
 
   Scenario: Import Map Data
     Given there is no map data in the database
+    And I already have an auth token expiring in 10 seconds
     When I schedule the "import map data" job
     And wait for 1 seconds
     Then the response code is 201
@@ -19,6 +21,7 @@ Feature: Jobs
 
   Scenario: Re-Import Map Data
     Given there is map data in the database
+    And I already have an auth token expiring in 10 seconds
     When I schedule the "import map data" job
     And wait for 1 seconds
     Then the response code is 201
@@ -27,6 +30,7 @@ Feature: Jobs
 
   Scenario: Import Market Data
     Given there is no market data in the system
+    And I already have an auth token expiring in 10 seconds
     When I schedule the "import market data" job
     And wait for 1 seconds
     Then the response code is 201
@@ -36,6 +40,7 @@ Feature: Jobs
   Scenario: Re-Import Market Data
     Given there is market data in the system for item 34
     And there is market data in the system for item 35
+    And I already have an auth token expiring in 10 seconds
     When I schedule the "import market data" job
     And wait for 1 seconds
     Then the response code is 201

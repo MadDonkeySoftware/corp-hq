@@ -156,6 +156,9 @@ When('I schedule the {string} job', function (job, callback) {
         method: 'POST',
         uri: this.v1Url('job'),
         json: true,
+        headers: {
+            'auth-token': test.token
+        },
         body: {
             "jobType": jobMap[job]
         }

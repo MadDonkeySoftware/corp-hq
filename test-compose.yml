@@ -45,6 +45,7 @@ services:
             - MONGO_LOG_DIR=/dev/null
         volumes:
             - ./mongo-scripts:/var/scripts
+            - mongodb:/data/db
         networks:
             - test-network
         command: mongod --smallfiles --logpath=/dev/null  # -auth  # --quiet
@@ -67,3 +68,6 @@ services:
 networks:
     test-network:
         name: test-network
+
+volumes:
+    mongodb:
