@@ -39,7 +39,7 @@ echo "-----------"
 echo "Sleeping then starting the tests."
 echo "-----------"
 sleep 2
-docker run -it -v $(pwd)/tests/behavior:/home/node/app -w="/home/node/app" --network="test-network" --name test-node node:8 bash -c "npm install; API_URL=http://test-api MONGO_URL=mongodb://test-mongodb:27017/auth npm run cucumber"
+docker run -it --rm -v $(pwd)/tests/behavior:/home/node/app -w="/home/node/app" --network="test-network" --name test-node node:8 bash -c "npm install; API_URL=http://test-api MONGO_URL=mongodb://test-mongodb:27017/auth npm run cucumber -- --tags 'not @ignore'"
 EXIT_CODE="$(docker inspect --format='{{.State.ExitCode}}' test-node)"
 
 echo "-----------"
@@ -49,7 +49,6 @@ if [ "$1" = "debug" ] && [ "$EXIT_CODE" != "0" ]; then
     echo "Not cleaning up containers or volumes since debug mode is on and there was an error. Run 'docker-compose -f test-compose.yml down -v' to clean up containers."
 else
     docker-compose -f test-compose.yml down -v
-    docker rm test-node -v
 fi
 
 # Helpful commands for debugging.

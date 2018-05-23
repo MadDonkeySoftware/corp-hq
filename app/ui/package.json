@@ -13,6 +13,10 @@
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
     "build": "node build/build.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MadDonkeySoftware/corp-hq"
+  },
   "dependencies": {
     "axios": "^0.18.0",
     "bulma": "^0.6.2",
