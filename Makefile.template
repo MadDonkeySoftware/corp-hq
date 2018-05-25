@@ -12,9 +12,6 @@ build-runner:  ## Builds the API displaying any analytics violations.
 build-runner-tests:  ## Builds the API tests.
 	dotnet build --no-incremental ./tests/unit/runnertest
 
-build-ui:  ## Builds the vue web site to deployable assets
-	npm run --prefix ./app/ui build
-
 docker-build-api: publish-api  ## Runs the docker build for the corp-hq api project
 	docker build --no-cache -t corp-hq-api ./app/api
 
@@ -23,7 +20,7 @@ docker-build-images: docker-build-api docker-build-runner docker-build-ui  ## Ru
 docker-build-runner: publish-runner  ## Runs the docker build for the corp-hq api project
 	docker build --no-cache -t corp-hq-runner ./app/runner
 
-docker-build-ui: build-ui  ## Runs the docker build for the corp-hq ui project
+docker-build-ui:  ## Runs the docker build for the corp-hq ui project
 	docker build --no-cache -t corp-hq-ui ./app/ui
 
 help:  ## Prints this help message.
