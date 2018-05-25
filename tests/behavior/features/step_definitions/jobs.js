@@ -182,7 +182,7 @@ Then('a job id is returned', function() {
     }
 })
 
-Then('the database has the appropriate indexes applied', {timeout: 60 * 1000}, function (callback) {
+Then('the database has the appropriate indexes applied', function (callback) {
     // Write code here that turns the phrase above into concrete actions
     let test = this
     let verify = function (job, callback) {
@@ -197,7 +197,7 @@ Then('the database has the appropriate indexes applied', {timeout: 60 * 1000}, f
 });
 
 
-Then('the database has the appropriate map data', {timeout: 60 * 1000}, function (callback) {
+Then('the database has the appropriate map data', function (callback) {
     // Write code here that turns the phrase above into concrete actions
     let test = this
     let verify = function (job, callback) {
@@ -235,7 +235,7 @@ Then('the database has the appropriate map data', {timeout: 60 * 1000}, function
 
 });
 
-Then('the database has the appropriate market data', {timeout: 60 * 1000}, function (callback) {
+Then('the database has the appropriate market data', function (callback) {
     // Write code here that turns the phrase above into concrete actions
     let test = this
     let verify = function (job, callback) {

@@ -1,5 +1,27 @@
-const {setWorldConstructor} = require('cucumber');
+const {setWorldConstructor, setDefaultTimeout} = require('cucumber');
 const {MongoClient} = require('mongodb')
+
+/**
+ * Gets a value from the environment or returns the default.
+ *
+ * @param {string} varname
+ *   The key of the variable in the environment.
+ * @param {object} defaultvalue
+ *   The value to use if the key is not present in the environment.
+ * @returns {object}
+ *   The value referenced by the varname or the default provided.
+ */
+let getEnvironmentVar = function (varname, defaultvalue)
+{
+    var result = process.env[varname];
+    if (result != undefined){
+        // console.debug('ENV VAR used. ' + varname + ' ' + result)
+        return result;
+    } else {
+        // console.debug('DEFAULT used. ' + varname + ' ' + defaultvalue)
+        return defaultvalue;
+    }
+}
 
 function CustomWorld() {
     let parent = this
@@ -30,27 +52,7 @@ function CustomWorld() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    /**
-     * Gets a value from the environment or returns the default.
-     *
-     * @param {string} varname
-     *   The key of the variable in the environment.
-     * @param {object} defaultvalue 
-     *   The value to use if the key is not present in the environment.
-     * @returns {object}
-     *   The value referenced by the varname or the default provided.
-     */
-    this.getEnvironmentVar = function (varname, defaultvalue)
-    {
-        var result = process.env[varname];
-        if (result != undefined){
-            // console.debug('ENV VAR used. ' + varname + ' ' + result)
-            return result;
-        } else {
-            // console.debug('DEFAULT used. ' + varname + ' ' + defaultvalue)
-            return defaultvalue;
-        }
-    }
+    this.getEnvironmentVar = getEnvironmentVar
 
     /**
      * Polls the database invoking the completed callback when the job has been detected as complete or when the
@@ -122,3 +124,4 @@ function CustomWorld() {
 }
 
 setWorldConstructor(CustomWorld)
+setDefaultTimeout(parseInt(getEnvironmentVar('CORPHQ_BEHAVE_STEP_TIMEOUT', '5')) * 1000)
