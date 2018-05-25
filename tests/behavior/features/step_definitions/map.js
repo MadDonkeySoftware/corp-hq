@@ -64,6 +64,9 @@ When('I query the list region endpoint', function (callback) {
     let args = {
         method: 'GET',
         uri: this.v1Url('map/regions'),
+        headers: {
+            'auth-token': test.token
+        },
         json: true
     }
 

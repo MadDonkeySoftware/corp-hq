@@ -6,6 +6,7 @@ namespace Api
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Api.Extensions;
     using Api.Model.Data;
     using Common.Data;
     using Microsoft.AspNetCore.Builder;
@@ -81,6 +82,7 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseRequestToken();
             app.UseCors("AllowAllOrigins");
             app.UseMvc();
         }
