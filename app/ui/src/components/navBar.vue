@@ -41,7 +41,6 @@
 
 <script>
 import axios from 'axios'
-import constants from '@/constants'
 
 export default {
   name: 'nav-bar',
@@ -76,7 +75,7 @@ export default {
       // TODO: Let the API know we've logged out.
       axios.delete('http://127.0.0.1:5000/api/v1/token/' + this.authToken)
         .then(response => {
-          Event.fire(constants.authTokenUpdated, null)
+          this.$store.commit('updateKey', {apiKey: null})
           parent._navHelper({name: 'Main'})
         })
         .catch(e => {
@@ -95,14 +94,8 @@ export default {
   },
   computed: {
     isAuthenticated: function () {
-      return this.authToken != null
+      return this.$store.state.apiKey != null
     }
-  },
-  mounted () {
-    let parent = this
-    Event.listen(constants.authTokenUpdated, function (token) {
-      parent.authToken = token
-    })
   }
 }
 </script>

@@ -48,7 +48,6 @@
 
 <script>
 import axios from 'axios'
-import constants from '@/constants'
 import utils from '@/utils'
 
 export default {
@@ -72,7 +71,7 @@ export default {
         }
         axios.post(utils.buildApiUrl('/api/v1/authentication'), data)
           .then(response => {
-            Event.fire(constants.authTokenUpdated, response.data['token'])
+            this.$store.commit('updateKey', {apiKey: response.data['token']})
             this.$router.push({name: 'Dashboard', params: { userId: 123 }})
           })
           .catch(e => {
