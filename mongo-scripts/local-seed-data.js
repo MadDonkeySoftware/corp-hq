@@ -8,6 +8,16 @@ var rabbitSettings = {
     recordTtl: 5,
     recordHeartbeat: 1
 };
+var eveDataUri = "https://esi.tech.ccp.is/latest";
 
-db.settings.replaceOne({ key: "rabbitConnection" }, { key: "rabbitConnection", value: rabbitSettings}, {upsert: true});
-db.settings.replaceOne({ key: "eveDataUri" }, { key: "eveDataUri", value: "https://esi.tech.ccp.is/latest"}, {upsert: true});
+var updateSetting = function (key, value) {
+    try {
+        db.settings.replaceOne({ key: key }, { key: key, value: value }, { upsert: true })
+    } catch (error) {
+        db.settings.remove({ key: key })
+        db.settings.insert({ key: key , value: value })
+    }
+}
+
+updateSetting("rabbitConnection", rabbitSettings)
+updateSetting("eveDataUri", eveDataUri)
