@@ -2,7 +2,17 @@
   <section class="section">
     <div class="columns">
       <div class="column is-one-fifth"></div>
-        <div class="column is-danger" v-if="errors.length">
+        <div class="column" v-if="messages.length">
+          <ul>
+            <li v-for="message in messages" v-bind:key="message">{{ message }}</li>
+          </ul>
+        </div>
+      <div class="column is-one-fifth"></div>
+    </div>
+
+    <div class="columns">
+      <div class="column is-one-fifth"></div>
+        <div class="column" v-if="errors.length">
           <b>{{$t('pleaseCorrectErrors')}}</b>
           <ul>
             <li v-for="error in errors" v-bind:key="error">{{ error }}</li>
@@ -57,7 +67,8 @@ export default {
       submittingLogin: false,
       errors: [],
       username: '',
-      password: ''
+      password: '',
+      messages: []
     }
   },
   methods: {
@@ -91,6 +102,13 @@ export default {
 
       return this.errors.length === 0
     }
+  },
+  mounted () {
+    var parent = this
+    this.$store.state.messages.forEach(function (item, index) {
+      parent.messages.push(item)
+    })
+    this.$store.commit('clearMessages')
   }
 }
 </script>

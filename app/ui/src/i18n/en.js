@@ -7,6 +7,7 @@ export default {
   'password': 'Password',
   'pleaseCorrectErrors': 'Please correct the following error(s):',
   'register': 'Register',
+  'registrationSuccessful': 'Registration successful. Please log in.',
   'reviewTermsAndConditions': 'Review them here.',
   'submit': 'Submit',
   'username': 'Username'

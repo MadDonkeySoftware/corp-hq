@@ -107,7 +107,8 @@ export default {
         }
         axios.post(utils.buildApiUrl('/api/v1/registration'), data)
           .then(response => {
-            this.errors.push('Success!')
+            this.$store.commit('addMessage', {message: this.$t('registrationSuccessful')})
+            this.$router.push({name: 'LogIn'})
           })
           .catch(e => {
             e.response.data['messages'].forEach(message => {
