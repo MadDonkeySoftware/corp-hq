@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import utils from '@/utils'
 import axios from 'axios'
 
 export default {
@@ -73,7 +74,7 @@ export default {
       let parent = this
 
       // TODO: Let the API know we've logged out.
-      axios.delete('http://127.0.0.1:5000/api/v1/token/' + this.authToken)
+      axios.delete(utils.buildApiUrl('/api/v1/token/' + this.authToken))
         .then(response => {
           this.$store.commit('updateKey', {apiKey: null})
           parent._navHelper({name: 'Main'})

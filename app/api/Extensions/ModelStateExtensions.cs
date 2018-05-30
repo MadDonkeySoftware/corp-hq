@@ -18,19 +18,26 @@ namespace Api.Extensions
         /// <returns>
         /// A list of error messages from ModelState
         /// </returns>
-        public static List<string> Errors(this ModelStateDictionary modelState)
+        public static Dictionary<string, List<string>> Errors(this ModelStateDictionary modelState)
         {
-            var errors = from x in modelState.Values
-                from y in x.Errors
-                where x.Errors.Count > 0
-                select y.ErrorMessage;
+            var errors = new Dictionary<string, List<string>>();
 
-            if (errors.Any())
+            foreach (var key in modelState.Keys)
             {
-                return errors.ToList();
+                var entry = modelState[key];
+                var messages = new List<string>();
+                foreach (var error in entry.Errors)
+                {
+                    messages.Add(error.ErrorMessage);
+                }
+
+                if (messages.Count > 0)
+                {
+                    errors[key] = messages;
+                }
             }
 
-            return new List<string>();
+            return errors;
         }
     }
 }

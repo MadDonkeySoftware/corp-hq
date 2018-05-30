@@ -18,12 +18,7 @@
 
 <script>
 export default {
-  name: 'link-group',
-  data () {
-    return { }
-  },
-  methods: {
-  }
+  name: 'link-group'
 }
 </script>
 

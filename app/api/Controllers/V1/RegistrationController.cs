@@ -47,7 +47,7 @@ namespace Api.Controllers.V1
         [HttpPost]
         public ActionResult Post([FromBody]RegistrationUser newUser)
         {
-            List<string> errors;
+            Dictionary<string, List<string>> errors;
             if (!this.ModelState.IsValid)
             {
                 // get built in errors
@@ -85,7 +85,7 @@ namespace Api.Controllers.V1
             return this.Accepted();
         }
 
-        private static List<string> ValidateUserRegistrationBody(RegistrationUser user, IMongoCollection<User> col)
+        private static Dictionary<string, List<string>> ValidateUserRegistrationBody(RegistrationUser user, IMongoCollection<User> col)
         {
             // Perform expensive validations.
             var usernameFree = col.Count(new BsonDocument { { "username", user.Username } }) == 0;
@@ -93,10 +93,13 @@ namespace Api.Controllers.V1
 
             if (!usernameFree || !emailFree)
             {
-                return new List<string> { "Invalid username or email." };
+                return new Dictionary<string, List<string>>
+                {
+                   { "General", new List<string> { "Invalid username or email." } }
+                };
             }
 
-            return new List<string>();
+            return new Dictionary<string, List<string>>();
         }
     }
 }
