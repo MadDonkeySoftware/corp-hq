@@ -1,11 +1,16 @@
 # Local Development Guide
 - [Local Development Guide](#local-development-guide)
+  - [Quick Start](#quick-start)
   - [General Notes](#general-notes)
   - [Requirements](#requirements)
   - [Install Dependencies](#install-dependencies)
   - [Running the applications and dependencies](#running-the-applications-and-dependencies)
   - [Getting Help](#getting-help)
     - [Core developers](#core-developers)
+
+## Quick Start
+This quick start assumes you have docker and docker-compose installed already.
+* Run the `quick-start.sh` script.
 
 ## General Notes
 * `<root>` will signify the root directory of this solution. This is the directory with "LICENSE" and "app" in it.
@@ -55,7 +60,6 @@ One excellent way of getting help getting your environment set up is to ask a qu
 ### Core developers
 As cores join and leave the project we will try to keep this list as up to date as possible.
 
-| Developer (GitHub user) | Environment   |
-| ----------------------- | ------------- |
-| fritogotlayed           | Mac OS        |
-| naitp                   | Linux         |
+| Developer (GitHub user) | Environment    |
+| ----------------------- | -------------- |
+| fritogotlayed           | Mac OS & Linux |

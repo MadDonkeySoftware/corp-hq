@@ -30,7 +30,7 @@ services:
         links:
             - "mongodb:mongo"
             - "rabbitmq:rabbit"
-        command: bash -c "sleep 10 && dotnet build --no-incremental ./app/runner && dotnet run -p ./app/runner"
+        command: bash -c "sleep 0 && dotnet build --no-incremental ./app/runner && dotnet run -p ./app/runner"
     mongodb:
         container_name: "mongodb"
         image: mongo:3.6.3
@@ -39,6 +39,7 @@ services:
             - MONGO_LOG_DIR=/dev/null
         volumes:
             - ./mongo-data/db:/data/db
+            - ./mongo-scripts:/var/scripts
         ports:
             - 27017:27017
         command: mongod --smallfiles --logpath=/dev/null  # -auth  # --quiet
@@ -67,8 +68,8 @@ services:
             - 5672:5672
         labels:
             NAME: "rabbitmq1"
-    nginx:
-        container_name: "nginx"
+    proxy:
+        container_name: "proxy"
         image: nginx:alpine
         volumes:
             - ./nginx-files/nginx.conf:/etc/nginx/nginx.conf
