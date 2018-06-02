@@ -87,7 +87,13 @@ namespace Api.Controllers.V1
                 }
             }
 
-            return this.Unauthorized();
+            return this.BadRequest(new
+            {
+                messages = new Dictionary<string, List<string>>
+                {
+                    { "General", new List<string> { "Login Failed. Please try again." } }
+                }
+            });
         }
     }
 }

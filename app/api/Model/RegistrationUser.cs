@@ -2,13 +2,14 @@
 
 namespace Api.Model
 {
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using Newtonsoft.Json;
 
     /// <summary>
     /// A class that represents the data submitted for user registration.
     /// </summary>
-    public class RegistrationUser
+    public class RegistrationUser : IValidatableObject
     {
         private string username;
 
@@ -60,5 +61,25 @@ namespace Api.Model
         [Required]
         [JsonProperty("email")]
         public string Email { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the terms and conditions have been accepted.
+        /// </summary>
+        /// <returns>true if terms have been accepted, false otherwise.</returns>
+        [JsonProperty("terms")]
+        public bool TermsAccepted { get; set; }
+
+        /// <summary>
+        /// Performs model validations that cannot be done through attributes.
+        /// </summary>
+        /// <param name="validationContext">The validation context.</param>
+        /// <returns>An enumerable set of validation results.</returns>
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!this.TermsAccepted)
+            {
+                yield return new ValidationResult("You must accept the terms and conditions.", new List<string> { "TermsAccepted" });
+            }
+        }
     }
 }
