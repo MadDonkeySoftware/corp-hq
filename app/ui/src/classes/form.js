@@ -19,9 +19,6 @@ export default class Form {
       data[property] = this[property]
     }
 
-    delete data.errors
-    delete data.originalData
-
     return data
   }
 

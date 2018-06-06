@@ -10,7 +10,7 @@ export default {
     }
   },
   buildApiUrl: function (part) {
-    let url = this.getEnvironmentVar('CORPHQ_API_URL', 'http://127.0.0.1:5000')
+    let url = ''
     if (!part.startsWith('/')) {
       url += '/'
     }

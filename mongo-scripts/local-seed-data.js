@@ -1,7 +1,7 @@
 var rabbitSettings = {
     hosts: [
-        // {address: "rabbit"},
-        {address: "localhost"}
+        {address: "rabbit"},
+        // {address: "localhost"}
     ],
     username: "rabbitmq",
     password: "rabbitmq",

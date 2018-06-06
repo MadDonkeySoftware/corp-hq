@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --host 0.0.0.0 --progress --config build/webpack.dev.conf.js",
+    "dev-docker": "webpack-dev-server --inline --disable-host-check --host 0.0.0.0 --port 80 --config build/webpack.dev.conf.js",
     "prod": "webpack-dev-server --host 0.0.0.0 --config build/webpack.prod.conf.js",
     "start": "npm run dev",
     "unit": "jest --config test/unit/jest.conf.js --coverage",
