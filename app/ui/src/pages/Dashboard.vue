@@ -1,3 +1,12 @@
+<i18n>
+  {
+    "en": {
+      "other": "Other",
+      "miningOperations": "Mining Operations"
+    }
+  }
+</i18n>
+
 <template>
   <section class="section">
     <p>{{ msg }}</p>
@@ -14,10 +23,10 @@
       <div class="column">
         <link-group>
           <template slot="header">
-            Other
+            {{ $t('other') }}
           </template>
 
-          <router-link :to="{name:'MiningOperations'}">Mining Operations</router-link>
+          <router-link :to="{name:'MiningOperations'}">{{ $t('miningOperations') }}</router-link>
         </link-group>
       </div>
     </div>
