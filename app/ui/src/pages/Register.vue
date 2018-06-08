@@ -1,3 +1,18 @@
+<i18n>
+{
+  "en": {
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "email": "Email",
+    "submit": "Submit",
+    "registrationSuccessful": "Registration successful. Please log in.",
+    "reviewTermsAndConditions": "Review them here.",
+    "agreeWithTermsAndConditions": "I agree to the terms and conditions."
+  }
+}
+</i18n>
+
 <template>
   <section class="section">
     <div class="columns" style="margin-top: 8px"></div>

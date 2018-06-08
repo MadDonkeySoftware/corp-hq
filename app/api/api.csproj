@@ -17,9 +17,6 @@
     <NoWarn>SA1652,SA1636,SA1600</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\common\common.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -1,3 +1,14 @@
+<i18n>
+{
+  "en": {
+    "dashboard": "Dashboard",
+    "logIn": "Log In",
+    "logOut": "Log Out",
+    "register": "Register"
+  }
+}
+</i18n>
+
 <template>
   <nav class="navbar is-dark is-fixed-top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
@@ -13,6 +24,7 @@
     <div v-bind:class="menuBurgerCss">
       <div class="navbar-start">
         <!-- navbar items -->
+        <a class="navbar-item" v-if="isAuthenticated" v-on:click="_navHelper({name: 'Dashboard'})">{{$t('dashboard')}}</a>
       </div>
       <div class="navbar-end">
         <!-- navbar items -->
@@ -20,10 +32,10 @@
         <div class="navbar-item" v-if="!isAuthenticated">
           <div class="field is-grouped">
             <p class="control">
-              <button class="button" v-on:click="navToLogIn">{{$t('logIn')}}</button>
+              <button class="button" v-on:click="_navHelper({name: 'LogIn'})">{{$t('logIn')}}</button>
             </p>
             <p class="control">
-              <button class="button" v-on:click="navToRegistration">{{$t('register')}}</button>
+              <button class="button" v-on:click="_navHelper({name: 'Register'})">{{$t('register')}}</button>
             </p>
           </div>
         </div>
@@ -63,12 +75,6 @@ export default {
     navBurgerClick: function (event) {
       var newVal = !this.navBurgerCss['is-active']
       this._setNavState(newVal)
-    },
-    navToRegistration: function (event) {
-      this._navHelper({name: 'Register'})
-    },
-    navToLogIn: function (event) {
-      this._navHelper({name: 'LogIn'})
     },
     performLogOut: function () {
       let parent = this

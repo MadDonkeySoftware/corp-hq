@@ -4,8 +4,7 @@ import Vue from 'vue'
 import store from './store'
 import App from './App'
 import router from './router'
-import vuexI18n from 'vuex-i18n'
-import translationsEn from './i18n/en'
+import VueI18n from 'vue-i18n'
 
 // Set up a global mechanism to pass events
 /*
@@ -26,14 +25,18 @@ window.Event = new class {
 
 Vue.config.productionTip = false
 
-Vue.use(vuexI18n.plugin, store)
-
-Vue.i18n.add('en', translationsEn)
-
-Vue.i18n.set('en')
+Vue.use(VueI18n)
+const i18n = new VueI18n({
+  locale: 'en',
+  messages: {
+    en: {
+    }
+  }
+})
 
 /* eslint-disable no-new */
 new Vue({
+  i18n,
   store,
   el: '#app',
   router,

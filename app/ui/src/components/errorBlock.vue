@@ -1,3 +1,10 @@
+<i18n>
+{
+  "en": {
+    "pleaseCorrectErrors": "Please correct the following error(s):"
+  }
+}
+</i18n>
 <template>
   <article class="message is-danger">
     <div class="message-header">

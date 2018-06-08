@@ -1,3 +1,13 @@
+<i18n>
+{
+  "en": {
+    "username": "Username",
+    "password": "Password",
+    "submit": "Submit"
+  }
+}
+</i18n>
+
 <template>
   <section class="section">
     <div class="columns" style="margin-top: 8px"></div>

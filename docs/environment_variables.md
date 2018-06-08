@@ -1,8 +1,7 @@
 ## UI
 | Key            | Default               | Description |
 |----------------|-----------------------|-------------|
-| CORPHQ_API_URL | http://127.0.0.1:5000 | Used as the base for all generated api calls to the backend. |
-|                |                       |              |
+|                |                       |             |
 
 ## API
 | Key                    | Default    | Description |
@@ -10,13 +9,14 @@
 | ASPNETCORE_ENVIRONMENT | Production | If "Development", the developer exception page is returned on 500's |
 | MONGO_CONNECTION       | null       | The mongo database in which most application settings are stored. |
 | MONGO_DATABASE         | corp-hq    | The collection to use when persisting information in mongo. |
-|                        |            |              |
+| CORPHQ_API_URL         | null       | Used as the base for all generated api calls to the backend. |
+|                        |            |             |
 
 ## Runner
 | Key              | Default | Description |
 |------------------|---------|-------------|
 | MONGO_CONNECTION | null    | The mongo database in which most application settings are stored. |
-|                  |         |              |
+|                  |         |             |
 
 ## Celery Tests
 | Key                        | Default                        | Description |

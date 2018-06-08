@@ -25,11 +25,13 @@
     "fontawesome": "^4.7.2",
     "npm": "^5.7.1",
     "vue": "^2.5.2",
+    "vue-i18n": "^7.8.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "vuex-i18n": "^1.10.5"
   },
   "devDependencies": {
+    "@kazupon/vue-i18n-loader": "^0.3.0",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.2.1",
