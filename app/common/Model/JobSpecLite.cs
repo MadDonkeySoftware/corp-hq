@@ -9,6 +9,7 @@ namespace Common.Model
     /// <summary>
     /// A class representing a user inside of the system.
     /// </summary>
+    [BsonIgnoreExtraElements]
     public class JobSpecLite : MongoBase
     {
         /// <summary>
@@ -16,6 +17,18 @@ namespace Common.Model
         /// </summary>
         [BsonElement("uuid")]
         public string Uuid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parent job uuid.
+        /// </summary>
+        [BsonElement("parentUuid")]
+        public string ParentUuid { get; set; }
+
+        /// <summary>
+        /// Gets or sets the top-most parent job uuid.
+        /// </summary>
+        [BsonElement("masterUuid")]
+        public string MasterUuid { get; set; }
 
         /// <summary>
         /// Gets or sets the type of job.

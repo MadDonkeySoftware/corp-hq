@@ -25,10 +25,10 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="EveDataJob"/> class.
         /// </summary>
-        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="jobSpec">The job specification this is running for.</param>
         /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public EveDataJob(string jobUuid, IDbFactory dbFactory)
-            : base(jobUuid, dbFactory)
+        public EveDataJob(JobSpecLite jobSpec, IDbFactory dbFactory)
+            : base(jobSpec, dbFactory)
         {
         }
 

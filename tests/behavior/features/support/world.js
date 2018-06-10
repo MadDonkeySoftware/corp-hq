@@ -72,7 +72,7 @@ function CustomWorld() {
      *   The maximum amount of time to wait for a job to complete. When the timeout has ellapsed the current state of the job will be returned.
      */
     this.waitForJobToComplete = function (jobUuid, completed, callback, timeout = 30000) {
-        let lastTs = new Date().getTime() + timeout
+        let timeoutTs = new Date().getTime() + timeout
 
         let work = function (callback) {
             try {
@@ -92,13 +92,13 @@ function CustomWorld() {
                             }
 
                             let item = result[0];
-                            var awaitStatus = ['New', 'Running']
-                            if (new Date().getTime() > lastTs){
+                            var awaitStatus = ['Successful', 'Finished']
+                            if (new Date().getTime() > timeoutTs){
                                 completed(item, callback)
                             } else if (awaitStatus.indexOf(item['status']) > -1) {
-                                work(callback)
-                            } else {
                                 completed(item, callback)
+                            } else {
+                                work(callback)
                             }
                         })
                     }

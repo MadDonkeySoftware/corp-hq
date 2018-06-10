@@ -3,6 +3,7 @@
 namespace Common.Model
 {
     using System;
+    using System.Collections.Generic;
     using Common.Model;
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
@@ -12,6 +13,11 @@ namespace Common.Model
     /// </summary>
     public class JobSpec<T> : JobSpecLite where T : class
     {
+        public JobSpec()
+        {
+            this.Children = new List<string>();
+        }
+
         /// <summary>
         /// Gets or sets the start timestamp for the job.
         /// </summary>
@@ -23,6 +29,12 @@ namespace Common.Model
         /// </summary>
         [BsonElement("endTimestamp")]
         public DateTime? EndTimestamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parent job uuid.
+        /// </summary>
+        [BsonElement("children")]
+        public List<string> Children { get; set; }
 
         /// <summary>
         /// Gets or sets the data for the job.

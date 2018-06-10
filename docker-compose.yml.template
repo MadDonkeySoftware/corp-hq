@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
     ui:
         container_name: "corp-hq-ui"

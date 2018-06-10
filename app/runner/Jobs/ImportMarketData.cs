@@ -27,10 +27,10 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportMarketData"/> class.
         /// </summary>
-        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="jobSpec">The job specification this is running for.</param>
         /// <param name="dbFactory">The dbFactory for this job to use.</param>
-       public ImportMarketData(string jobUuid, IDbFactory dbFactory)
-            : base(jobUuid, dbFactory)
+       public ImportMarketData(JobSpecLite jobSpec, IDbFactory dbFactory)
+            : base(jobSpec, dbFactory)
         {
         }
 
@@ -39,10 +39,10 @@ namespace Runner.Jobs
         /// </summary>
         protected override void Work()
         {
-            this.AddMessage("Starting market data import.");
+            this.AddMessage(JobMessageLevel.Trace, "Starting market data import.");
 
             var jobCol = this.DbFactory.GetCollection<JobSpec<string>>(CollectionNames.Jobs);
-            var jobData = jobCol.AsQueryable().Where(j => j.Uuid == this.JobUuid).Select(j => j.Data).FirstOrDefault();
+            var jobData = jobCol.AsQueryable().Where(j => j.Uuid == this.JobSpec.Uuid).Select(j => j.Data).FirstOrDefault();
 
             if (string.IsNullOrEmpty(jobData))
             {
@@ -52,7 +52,7 @@ namespace Runner.Jobs
             var d = JsonConvert.DeserializeObject<MarketDataImport>(jobData);
             this.ImportEveMarketData(d);
 
-            this.AddMessage("Finished importing market data.");
+            this.AddMessage(JobMessageLevel.Trace, "Finished importing market data.");
         }
 
         private void ImportEveMarketData(MarketDataImport jobData)

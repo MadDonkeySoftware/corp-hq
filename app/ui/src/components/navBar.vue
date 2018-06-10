@@ -67,8 +67,7 @@ export default {
       menuBurgerCss: {
         'navbar-menu': true,
         'is-active': false
-      },
-      authToken: null
+      }
     }
   },
   methods: {
@@ -80,7 +79,7 @@ export default {
       let parent = this
 
       // TODO: Let the API know we've logged out.
-      axios.delete(utils.buildApiUrl('/api/v1/token/' + this.authToken))
+      axios.delete(utils.buildApiUrl('/api/v1/token/' + this.$store.state.apiKey))
         .then(response => {
           this.$store.commit('updateKey', {apiKey: null})
           parent._navHelper({name: 'Main'})

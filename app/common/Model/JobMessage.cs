@@ -19,10 +19,22 @@ namespace Common.Model
         public string JobUuid { get; set; }
 
         /// <summary>
+        /// Gets or sets the master job uuid.
+        /// </summary>
+        [BsonElement("masterJobUuid")]
+        public string MasterJobUuid { get; set; }
+
+        /// <summary>
         /// Gets or sets the type of job.
         /// </summary>
         [BsonElement("timestamp")]
         public DateTime Timestamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the message log level.
+        /// </summary>
+        [BsonElement("level")]
+        public ushort Level { get; set; }
 
         /// <summary>
         /// Gets or sets the message.

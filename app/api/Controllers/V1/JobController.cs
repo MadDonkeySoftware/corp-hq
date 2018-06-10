@@ -74,7 +74,7 @@ namespace Api.Controllers.V1
         public IActionResult Get(string jobUuid)
         {
             var jobCol = this.dbFactory.GetCollectionAsQueryable<JobSpec<dynamic>>(CollectionNames.Jobs);
-            var jobSpec = jobCol.Where(j => j.Uuid == jobUuid).Select(j => new { Status = j.Status, Type = j.Type, Start = j.StartTimestamp, End = j.EndTimestamp }).FirstOrDefault();
+            var jobSpec = jobCol.Where(j => j.Uuid == jobUuid).Select(j => new { Status = j.Status, Type = j.Type, Start = j.StartTimestamp, End = j.EndTimestamp, Children = j.Children }).FirstOrDefault();
 
             if (jobSpec == null)
             {
@@ -84,7 +84,10 @@ namespace Api.Controllers.V1
             }
 
             var messagesCol = this.dbFactory.GetCollectionAsQueryable<JobMessage>(CollectionNames.JobMessages);
-            var messages = messagesCol.Where(m => m.JobUuid == jobUuid).OrderBy(x => x.Timestamp).Select(m => m.Message).ToList();
+            var messages = messagesCol.Where(m => (m.JobUuid == jobUuid || m.MasterJobUuid == jobUuid) && m.Level > (ushort)JobMessageLevel.Debug)
+                                      .OrderBy(x => x.Timestamp)
+                                      .Select(m => m.Message)
+                                      .ToList();
 
             var details = new JobDetails
             {
@@ -135,26 +138,8 @@ namespace Api.Controllers.V1
                 ExpireAt = DateTime.Now.AddDays(3)
             });
 
-            using (var connection = this.connectionFactory.CreateConfiguredConnection())
-            using (var channel = connection.CreateModel())
-            {
-                // TODO: Move channel queue declare to startup.
-                channel.QueueDeclare(
-                    queue: "jobs",
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    arguments: null);
-
-                channel.BasicPublish(
-                    exchange: string.Empty,
-                    routingKey: "jobs",
-                    basicProperties: null,
-                    body: newJobUuid.ToByteArray());
-            }
-
             // TODO: Make base URL configurable. -- CORPHQ_API_URL
-            var baseUrl = new Uri("http://127.0.0.1:5000/api/v1/job/");
+            var baseUrl = new Uri("/api/v1/job/");
             var jobUrl = new Uri(baseUrl, newJobUuid.ToString());
             return this.Created(jobUrl, new ApiResponse<JobCreated> { Result = new JobCreated { Uuid = newJobUuid } });
         }

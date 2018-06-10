@@ -306,7 +306,6 @@ selenium-debug.log
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 
 # NPM things
 package-lock.json
@@ -315,5 +314,6 @@ package-lock.json
 mongo-data/
 app/api/api.xml
 app/runner/runner.xml
+app/manager/manager.xml
 docker-compose.yml
 Makefile
