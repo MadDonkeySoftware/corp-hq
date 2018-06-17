@@ -5,6 +5,7 @@ namespace Runner.Jobs
     using System;
 
     using Common.Data;
+    using Common.Model;
     using MongoDB.Driver;
 
     /// <summary>
@@ -15,10 +16,10 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateMongoIndexes"/> class.
         /// </summary>
-        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="jobSpec">The job specification this is running for.</param>
         /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public CreateMongoIndexes(string jobUuid, IDbFactory dbFactory)
-            : base(jobUuid, dbFactory)
+        public CreateMongoIndexes(JobSpecLite jobSpec, IDbFactory dbFactory)
+            : base(jobSpec, dbFactory)
         {
         }
 

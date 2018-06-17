@@ -17,6 +17,7 @@ echo "Build the applications before we create docker images for them."
 echo "-----------"
 dotnet publish --configuration Release ./app/api
 dotnet publish --configuration Release ./app/runner
+dotnet publish --configuration Release ./app/manager
 
 echo "-----------"
 echo "Build the images we will eventually test."
@@ -38,7 +39,7 @@ echo "-----------"
 echo "Sleeping $CORPHQ_BEHAVE_SLEEP seconds then starting the tested services."
 echo "-----------"
 sleep $CORPHQ_BEHAVE_SLEEP
-docker-compose -f test-compose.yml up -d test-runner test-api 
+docker-compose -f test-compose.yml up -d test-runner test-runner-2 test-manager test-api
 
 echo "-----------"
 echo "Sleeping $CORPHQ_BEHAVE_SLEEP seconds then starting the tests."

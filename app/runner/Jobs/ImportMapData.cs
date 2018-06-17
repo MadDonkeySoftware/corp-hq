@@ -7,6 +7,7 @@ namespace Runner.Jobs
     using System.Diagnostics.CodeAnalysis;
     using System.Net.Http;
     using Common.Data;
+    using Common.Model;
     using Common.Model.Eve;
     using MongoDB.Bson;
     using MongoDB.Driver;
@@ -23,10 +24,10 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportMapData"/> class.
         /// </summary>
-        /// <param name="jobUuid">The job uuid this is running for.</param>
+        /// <param name="jobSpec">The job specification this is running for.</param>
         /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public ImportMapData(string jobUuid, IDbFactory dbFactory)
-            : base(jobUuid, dbFactory)
+        public ImportMapData(JobSpecLite jobSpec, IDbFactory dbFactory)
+            : base(jobSpec, dbFactory)
         {
         }
 

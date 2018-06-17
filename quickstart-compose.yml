@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 services:
     ui:
         container_name: "corp-hq-ui"
@@ -13,24 +13,52 @@ services:
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
         volumes:
-            - .:/var/src
+            - .:/var/host-src:ro
+            - api:/var/src
         working_dir: /var/src
         links:
             - "mongodb:mongo"
             - "rabbitmq:rabbit"
-        command: bash -c "dotnet build --no-incremental ./app/api && dotnet run -p ./app/api"
+        command: bash -c "/var/host-src/docker-compose-files/quickstart-deploy.sh api /var/host-src /var/src"
     runner:
         container_name: "corp-hq-runner"
         image: microsoft/dotnet:2.1-sdk
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
         volumes:
-            - .:/var/src
+            - .:/var/host-src:ro
+            - runner1:/var/src
         working_dir: /var/src
         links:
             - "mongodb:mongo"
             - "rabbitmq:rabbit"
-        command: bash -c "sleep 0 && dotnet build --no-incremental ./app/runner && dotnet run -p ./app/runner"
+        command: bash -c "/var/host-src/docker-compose-files/quickstart-deploy.sh runner /var/host-src /var/src"
+    runner2:
+        container_name: "corp-hq-runner-2"
+        image: microsoft/dotnet:2.1-sdk
+        environment:
+            - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+        volumes:
+            - .:/var/host-src:ro
+            - runner2:/var/src
+        working_dir: /var/src
+        links:
+            - "mongodb:mongo"
+            - "rabbitmq:rabbit"
+        command: bash -c "/var/host-src/docker-compose-files/quickstart-deploy.sh runner /var/host-src /var/src"
+    manager:
+        container_name: "corp-hq-manager"
+        image: microsoft/dotnet:2.1-sdk
+        environment:
+            - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+        volumes:
+            - .:/var/host-src:ro
+            - manager:/var/src
+        working_dir: /var/src
+        links:
+            - "mongodb:mongo"
+            - "rabbitmq:rabbit"
+        command: bash -c "/var/host-src/docker-compose-files/quickstart-deploy.sh manager /var/host-src /var/src"
     mongodb:
         container_name: "mongodb"
         image: mongo:3.6.3
@@ -72,9 +100,15 @@ services:
         container_name: "proxy"
         image: nginx:alpine
         volumes:
-            - ./nginx-files/nginx.conf:/etc/nginx/nginx.conf
+            - ./docker-compose-files/nginx-files/nginx.conf:/etc/nginx/nginx.conf
         ports:
             - 80:80
         links:
             - api:corp-hq-api
             - ui:corp-hq-ui
+
+volumes:
+    api:
+    runner1:
+    runner2:
+    manager:

@@ -77,26 +77,7 @@ namespace Runner
             var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>(CollectionNames.Settings);
             var settings = settingsCollection.AsQueryable().Where(s => s.Key == "rabbitConnection").First().Value;
 
-            connectionFactory.UserName = settings.Username;
-            connectionFactory.Password = settings.Password;
-
-            var timeout = DateTime.Now.AddSeconds(30);
-            do
-            {
-                try
-                {
-                    this.connection = connectionFactory.CreateConnection(settings.Hosts.Select(h => h.Address).ToList());
-                }
-                catch (BrokerUnreachableException)
-                {
-                }
-            }
-            while (DateTime.Now < timeout && this.connection == null);
-
-            if (this.connection == null)
-            {
-                throw new TimeoutException("Could not connect to RabbitMQ instance.");
-            }
+            this.ConnectToMessageQueue(settings);
 
             this.channel = this.connection.CreateModel();
             this.channel.BasicQos(0, 1, false);
@@ -206,10 +187,9 @@ namespace Runner
                 Console.WriteLine(" [x] Received  {0}", uuid);
 
                 /* TODO: Actual job processing logic here. */
-                var col = dbFactory.GetCollection<JobSpec<object>>(CollectionNames.Jobs);
+                var col = dbFactory.GetCollection<JobSpecLite>(CollectionNames.Jobs);
 
                 var jobSpec = col.AsQueryable().Where(j => j.Uuid == uuid)
-                                               .Select(j => new JobSpecLite { Uuid = j.Uuid, Type = j.Type })
                                                .FirstOrDefault();
 
                 var job = JobFactory.AcquireJob(jobSpec);
@@ -225,6 +205,30 @@ namespace Runner
             {
                 Console.WriteLine("Error: {0}", ex.Message);
                 Console.WriteLine("{0}", ex.StackTrace);
+            }
+        }
+
+        private void ConnectToMessageQueue(Common.Model.RabbitMQ.Root settings)
+        {
+            connectionFactory.UserName = settings.Username;
+            connectionFactory.Password = settings.Password;
+
+            var timeout = DateTime.Now.AddSeconds(30);
+            do
+            {
+                try
+                {
+                    this.connection = connectionFactory.CreateConnection(settings.Hosts.Select(h => h.Address).ToList());
+                }
+                catch (BrokerUnreachableException)
+                {
+                }
+            }
+            while (DateTime.Now < timeout && this.connection == null);
+
+            if (this.connection == null)
+            {
+                throw new TimeoutException("Could not connect to RabbitMQ instance.");
             }
         }
     }

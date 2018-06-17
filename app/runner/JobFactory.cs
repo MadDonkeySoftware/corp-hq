@@ -37,13 +37,13 @@ namespace Runner
             switch (jobSpec.Type)
             {
                 case JobTypes.ApplyDbIndexes:
-                    job = new CreateMongoIndexes(jobSpec.Uuid, dbFactory ?? DbFactory);
+                    job = new CreateMongoIndexes(jobSpec, dbFactory ?? DbFactory);
                     break;
                 case JobTypes.ImportMapData:
-                    job = new ImportMapData(jobSpec.Uuid, dbFactory ?? DbFactory);
+                    job = new ImportMapData(jobSpec, dbFactory ?? DbFactory);
                     break;
                 case JobTypes.ImportMarketData:
-                    job = new ImportMarketData(jobSpec.Uuid, dbFactory ?? DbFactory);
+                    job = new ImportMarketData(jobSpec, dbFactory ?? DbFactory);
                     break;
                 default:
                     job = null;
