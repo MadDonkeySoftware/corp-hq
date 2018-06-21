@@ -12,7 +12,7 @@ docker-compose -f quickstart-compose.yml down -v 1>/dev/null 2>/dev/null
 echo "-----------"
 echo "First we start up the dependencies."
 echo "-----------"
-docker-compose -f quickstart-compose.yml up -d mongodb eve-api rabbitmq
+docker-compose -f quickstart-compose.yml up -d mongodb eve-api rabbitmq redis
 
 echo "-----------"
 echo "Next we seed the database with some settings"

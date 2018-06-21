@@ -92,7 +92,7 @@ namespace Common.Data
         /// <param name="collectionName">The collection in the corresponding mongo database.</param>
         /// <param name="databaseName">An optional mongo database to connect to.</param>
         /// <param name="client">An optional client with which to connect.</param>
-        /// <param name="aggregateOptions">An optional set of aggretation options for the queryable call.</param>
+        /// <param name="aggregateOptions">An optional set of aggregation options for the queryable call.</param>
         /// <typeparam name="T">The type of data that this collection houses.</typeparam>
         /// <remarks>
         /// Use the optional "databaseName" if the intent is to connect to a database other that what was provided during application startup.

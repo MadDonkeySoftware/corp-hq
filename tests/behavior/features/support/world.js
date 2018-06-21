@@ -92,7 +92,7 @@ function CustomWorld() {
                             }
 
                             let item = result[0];
-                            var awaitStatus = ['Successful', 'Finished']
+                            var awaitStatus = ['Successful', 'Failed']
                             if (new Date().getTime() > timeoutTs){
                                 completed(item, callback)
                             } else if (awaitStatus.indexOf(item['status']) > -1) {

@@ -15,6 +15,7 @@ namespace Runner
     using Newtonsoft.Json;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using RedLockNet.SERedis;
     using Runner.Jobs;
     using Runner.Model;
 
@@ -23,34 +24,32 @@ namespace Runner
     /// </summary>
     public static class JobFactory
     {
-        private static readonly IDbFactory DbFactory = new DbFactory();
-
         /// <summary>
         /// Creates a new IJob instance for the appropriate job type.
         /// </summary>
         /// <param name="jobSpec">The job specification to initialize the job for.</param>
-        /// <param name="dbFactory">An option DbFactory to use with the new job.</param>
         /// <returns>An instance of a job ready to be started.</returns>
-        public static IJob AcquireJob(JobSpecLite jobSpec, IDbFactory dbFactory = null)
+        public static IJob AcquireJob(JobSpecLite jobSpec)
         {
-            IJob job;
+            Job job;
             switch (jobSpec.Type)
             {
                 case JobTypes.ApplyDbIndexes:
-                    job = new CreateMongoIndexes(jobSpec, dbFactory ?? DbFactory);
+                    job = (Job)Bootstrap.ServiceProvider.GetService(typeof(CreateMongoIndexes));
                     break;
                 case JobTypes.ImportMapData:
-                    job = new ImportMapData(jobSpec, dbFactory ?? DbFactory);
+                    job = (Job)Bootstrap.ServiceProvider.GetService(typeof(ImportMapData));
                     break;
                 case JobTypes.ImportMarketData:
-                    job = new ImportMarketData(jobSpec, dbFactory ?? DbFactory);
+                    job = (Job)Bootstrap.ServiceProvider.GetService(typeof(ImportMarketData));
                     break;
                 default:
                     job = null;
                     break;
             }
 
-            return (IJob)job;
+            job.JobSpec = jobSpec;
+            return job;
         }
     }
 }

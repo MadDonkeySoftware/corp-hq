@@ -2,11 +2,19 @@
 
 namespace Runner.Jobs
 {
+    using Common.Model;
+
     /// <summary>
     /// Contract for a job in this system.
     /// </summary>
     public interface IJob
     {
+        /// <summary>
+        /// Gets the internal job specification for this job.
+        /// </summary>
+        /// <returns>The job UUID.</returns>
+        JobSpecLite JobSpec { get; }
+
         /// <summary>
         /// Starts the job processing code.
         /// </summary>

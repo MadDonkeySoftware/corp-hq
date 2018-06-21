@@ -15,6 +15,9 @@ namespace Runner.Jobs
     using Common.Model.JobData;
     using MongoDB.Driver;
     using Newtonsoft.Json;
+    using RedLockNet.SERedis;
+    using Runner.Data;
+    using StackExchange.Redis;
 
     /// <summary>
     /// Job for creating the mongo indexes
@@ -22,17 +25,28 @@ namespace Runner.Jobs
     public class ImportMarketData : EveDataJob
     {
         private static readonly SmartHttpClient Client = new SmartHttpClient();
-        private IMongoCollection<MarketOrder> marketOrderCol;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportMarketData"/> class.
         /// </summary>
-        /// <param name="jobSpec">The job specification this is running for.</param>
-        /// <param name="dbFactory">The dbFactory for this job to use.</param>
-       public ImportMarketData(JobSpecLite jobSpec, IDbFactory dbFactory)
-            : base(jobSpec, dbFactory)
+        /// <param name="jobRepository">The job repository used to persist information relating to this job.</param>
+        /// <param name="settingRepository">The setting repository used to acquire setting information.</param>
+        /// <param name="distributedLockRepository">The redis lock factory.</param>
+        /// <param name="marketOrderRepository">The market order repository used to acquire and persist market information.</param>
+        /// <param name="distributedKeyValueRepository">The distributed key value store used so we don't hit the Eve API too hard.</param>
+       public ImportMarketData(IJobRepository jobRepository, ISettingRepository settingRepository, IDistributedLockRepository distributedLockRepository, IMarketOrderRepository marketOrderRepository, IDistributedKeyValueRepository distributedKeyValueRepository)
+            : base(jobRepository, settingRepository)
         {
+            this.DistributedLockRepository = distributedLockRepository;
+            this.MarketOrderRepository = marketOrderRepository;
+            this.DistributedKeyValueRepository = distributedKeyValueRepository;
         }
+
+        private IDistributedLockRepository DistributedLockRepository { get; set; }
+
+        private IMarketOrderRepository MarketOrderRepository { get; set; }
+
+        private IDistributedKeyValueRepository DistributedKeyValueRepository { get; set; }
 
         /// <summary>
         /// The main body for the job being run.
@@ -41,16 +55,8 @@ namespace Runner.Jobs
         {
             this.AddMessage(JobMessageLevel.Trace, "Starting market data import.");
 
-            var jobCol = this.DbFactory.GetCollection<JobSpec<string>>(CollectionNames.Jobs);
-            var jobData = jobCol.AsQueryable().Where(j => j.Uuid == this.JobSpec.Uuid).Select(j => j.Data).FirstOrDefault();
-
-            if (string.IsNullOrEmpty(jobData))
-            {
-                throw new NullReferenceException("No job data could be found for job.");
-            }
-
-            var d = JsonConvert.DeserializeObject<MarketDataImport>(jobData);
-            this.ImportEveMarketData(d);
+            var jobData = this.JobRepository.GetJobData<MarketDataImport>(this.JobSpec.Uuid);
+            this.ImportEveMarketData(jobData);
 
             this.AddMessage(JobMessageLevel.Trace, "Finished importing market data.");
         }
@@ -59,11 +65,34 @@ namespace Runner.Jobs
         {
             Client.DefaultRequestHeaders.Accept.Clear();
             Client.DefaultRequestHeaders.Add("Accept", "application/json");
-            this.marketOrderCol = this.DbFactory.GetCollection<MarketOrder>(CollectionNames.MarketOrders);
 
+            var expiry = TimeSpan.FromSeconds(60);
+            var wait = TimeSpan.FromSeconds(60);
+            var retry = TimeSpan.FromSeconds(1);
             foreach (var id in jobData.MarketTypeIds)
             {
-                this.ImportMarketDataForEveType(jobData.RegionId, id);
+                var key = $"ImportMarketData-{jobData.RegionId}-{id}";
+
+                using (var distLock = this.DistributedLockRepository.AcquireLock(key, expiry, wait, retry))
+                {
+                    if (distLock.IsAcquired)
+                    {
+                        var cacheKey = $"Refresh:{key}";
+                        if (this.DistributedKeyValueRepository.Retrieve(cacheKey) != null)
+                        {
+                            this.AddMessage($"Cache indicates data for region {jobData.RegionId} item {id} fetched recently; skipping.");
+                        }
+                        else
+                        {
+                            this.ImportMarketDataForEveType(jobData.RegionId, id);
+                            this.DistributedKeyValueRepository.Persist(cacheKey, key, TimeSpan.FromSeconds(300));
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("TEMP: Could not acquire redis lock.");
+                    }
+                }
             }
         }
 
@@ -82,20 +111,22 @@ namespace Runner.Jobs
 
                 foreach (var order in marketOrders)
                 {
-                    var filterCondition = Builders<MarketOrder>.Filter.Eq(r => r.OrderId, order.OrderId);
-                    var updateCondition = Builders<MarketOrder>.Update.Set(r => r.TypeId, order.TypeId)
-                                                                      .Set(r => r.LocationId, order.LocationId)
-                                                                      .Set(r => r.VolumeTotal, order.VolumeTotal)
-                                                                      .Set(r => r.VolumeRemain, order.VolumeRemain)
-                                                                      .Set(r => r.MinVolume, order.MinVolume)
-                                                                      .Set(r => r.Price, order.Price)
-                                                                      .Set(r => r.IsBuyOrder, order.IsBuyOrder)
-                                                                      .Set(r => r.Duration, order.Duration)
-                                                                      .Set(r => r.Issued, order.Issued)
-                                                                      .Set(r => r.Range, order.Range)
-                                                                      .Set(r => r.ExpireAt, order.Issued.AddDays(order.Duration));
-
-                    this.marketOrderCol.UpdateOne(filterCondition, updateCondition, new UpdateOptions { IsUpsert = true });
+                    var marketOrder = new MarketOrder
+                    {
+                        OrderId = order.OrderId,
+                        TypeId = order.TypeId,
+                        LocationId = order.LocationId,
+                        VolumeTotal = order.VolumeTotal,
+                        VolumeRemain = order.VolumeRemain,
+                        MinVolume = order.MinVolume,
+                        Price = order.Price,
+                        IsBuyOrder = order.IsBuyOrder,
+                        Duration = order.Duration,
+                        Issued = order.Issued,
+                        Range = order.Range,
+                        ExpireAt = order.Issued.AddDays(order.Duration)
+                    };
+                    this.MarketOrderRepository.Save(marketOrder);
                 }
 
                 orderCount = marketOrders.Count();

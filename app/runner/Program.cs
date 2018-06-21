@@ -4,6 +4,8 @@ namespace Runner
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -13,6 +15,8 @@ namespace Runner
     using Newtonsoft.Json;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using RedLockNet.SERedis;
+    using RedLockNet.SERedis.Configuration;
     using Runner.Model;
 
     /// <summary>
@@ -33,10 +37,24 @@ namespace Runner
 
         private static void ConfigureDependencies()
         {
+            Bootstrap.Initialize();
+
             var connString = new MongoUrl(Environment.GetEnvironmentVariable("MONGO_CONNECTION"));
             DbFactory.SetClient(new MongoClient(connString));
 
-            Monitor.Initialize(new ConnectionFactory(), new DbFactory());
+            var dbFactory = new DbFactory();
+            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.Redis.Root>>(CollectionNames.Settings);
+
+            var redisSettings = settingsCollection.AsQueryable().Where(s => s.Key == "redisConnection").First().Value;
+            var endPoints = new List<RedLockEndPoint>();
+            foreach (var endPoint in redisSettings.Hosts.Select(h => new DnsEndPoint(h.Address, h.Port)).ToList())
+            {
+                endPoints.Add(endPoint);
+            }
+
+            var redLockFactory = RedLockFactory.Create(endPoints);
+
+            Monitor.Initialize(new ConnectionFactory(), new DbFactory(), redLockFactory);
         }
     }
 }

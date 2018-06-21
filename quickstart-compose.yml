@@ -12,6 +12,7 @@ services:
         image: microsoft/dotnet:2.1-sdk
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         volumes:
             - .:/var/host-src:ro
             - api:/var/src
@@ -25,6 +26,7 @@ services:
         image: microsoft/dotnet:2.1-sdk
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         volumes:
             - .:/var/host-src:ro
             - runner1:/var/src
@@ -38,6 +40,7 @@ services:
         image: microsoft/dotnet:2.1-sdk
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         volumes:
             - .:/var/host-src:ro
             - runner2:/var/src
@@ -51,6 +54,7 @@ services:
         image: microsoft/dotnet:2.1-sdk
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         volumes:
             - .:/var/host-src:ro
             - manager:/var/src
@@ -96,6 +100,12 @@ services:
             - 5672:5672
         labels:
             NAME: "rabbitmq1"
+    redis:
+        container_name: "redis"
+        image: redis:alpine
+        hostname: "redis"
+        ports:
+            - 6379:6379
     proxy:
         container_name: "proxy"
         image: nginx:alpine

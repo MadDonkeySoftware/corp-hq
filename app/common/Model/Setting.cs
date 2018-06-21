@@ -18,6 +18,12 @@ namespace Common.Model
         public string Key { get; set; }
 
         /// <summary>
+        /// Gets or sets the key.
+        /// </summary>
+        [BsonElement("environment")]
+        public string Environment { get; set; }
+
+        /// <summary>
         /// Gets or sets the value.
         /// </summary>
         [BsonElement("value")]

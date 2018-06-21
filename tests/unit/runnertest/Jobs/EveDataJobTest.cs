@@ -17,6 +17,7 @@ namespace RunnerTests.Jobs
     using Moq;
     using Newtonsoft.Json;
     using RabbitMQ.Client;
+    using Runner.Data;
     using Runner.Jobs;
     using Xunit;
 
@@ -26,7 +27,8 @@ namespace RunnerTests.Jobs
     public class EveDataJobTest
     {
         private readonly string fakeJobUuid;
-        private readonly Mock<IDbFactory> dbFactoryMock;
+        private readonly Mock<IJobRepository> jobRepositoryMock;
+        private readonly Mock<ISettingRepository> settingRepositoryMock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EveDataJobTest"/> class.
@@ -34,11 +36,12 @@ namespace RunnerTests.Jobs
         public EveDataJobTest()
         {
             this.fakeJobUuid = string.Empty;
-            this.dbFactoryMock = new Mock<IDbFactory>();
+            this.jobRepositoryMock = new Mock<IJobRepository>();
+            this.settingRepositoryMock = new Mock<ISettingRepository>();
 
             this.Job = new JobWrapper(
-                this.fakeJobUuid,
-                this.dbFactoryMock.Object);
+                this.jobRepositoryMock.Object,
+                this.settingRepositoryMock.Object);
         }
 
         internal JobWrapper Job { get; set; }
@@ -60,16 +63,7 @@ namespace RunnerTests.Jobs
         public void CorrectCreateEndpoint(string eveBase, string part, string expected)
         {
             // Arrange
-            var settings = new List<Common.Model.Setting<string>>
-            {
-                new Common.Model.Setting<string>
-                {
-                    Key = "eveDataUri",
-                    Value = eveBase
-                }
-            };
-
-            this.dbFactoryMock.Setup(x => x.GetCollectionAsQueryable<Common.Model.Setting<string>>("corp-hq", CollectionNames.Settings, null, null)).Returns(settings.AsQueryable());
+            this.settingRepositoryMock.Setup(x => x.FetchSetting<string>("eveDataUri")).Returns(eveBase);
 
             // Act
             var result = (Uri)this.Job.CreateEndpoint(part);
@@ -80,8 +74,8 @@ namespace RunnerTests.Jobs
 
         internal class JobWrapper : EveDataJob
         {
-            public JobWrapper(string jobUuid, IDbFactory dbFactory)
-                : base(jobUuid, dbFactory)
+            public JobWrapper(IJobRepository jobRepository, ISettingRepository settingsRepository)
+                : base(jobRepository, settingsRepository)
             {
             }
 

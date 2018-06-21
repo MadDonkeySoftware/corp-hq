@@ -12,9 +12,11 @@ services:
         image: "corp-hq-api"
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         links:
             - "test-mongodb:mongo"
             - "test-rabbitmq:rabbit"
+            - "test-redis:redis"
         networks:
             - test-network
     test-runner:
@@ -23,9 +25,11 @@ services:
         image: "corp-hq-runner"
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         links:
             - "test-mongodb:mongo"
             - "test-rabbitmq:rabbit"
+            - "test-redis:redis"
         networks:
             - test-network
     test-runner-2:
@@ -34,9 +38,11 @@ services:
         image: "corp-hq-runner"
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         links:
             - "test-mongodb:mongo"
             - "test-rabbitmq:rabbit"
+            - "test-redis:redis"
         networks:
             - test-network
     test-manager:
@@ -45,9 +51,11 @@ services:
         image: "corp-hq-manager"
         environment:
             - MONGO_CONNECTION=mongodb://mongo:27017/corp-hq
+            - CORP_HQ_ENVIRONMENT=localDocker
         links:
             - "test-mongodb:mongo"
             - "test-rabbitmq:rabbit"
+            - "test-redis:redis"
         networks:
             - test-network
     test-eve-api:
@@ -84,6 +92,11 @@ services:
             - ./docker-compose-files/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
         labels:
             NAME: "rabbitmq1"
+        networks:
+            - test-network
+    test-redis:
+        container_name: "test-redis"
+        image: redis:alpine
         networks:
             - test-network
 
