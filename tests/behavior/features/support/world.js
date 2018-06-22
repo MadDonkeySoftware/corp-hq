@@ -118,8 +118,8 @@ function CustomWorld() {
         work(callback)
     }
 
-    this.rootUrl = this.getEnvironmentVar('API_URL', 'http://localhost:5000')
-    this.mongoUrl = this.getEnvironmentVar('MONGO_URL', 'mongodb://127.0.0.1:27017/auth')
+    this.rootUrl = this.getEnvironmentVar('API_URL', 'http://test-api:5000')
+    this.mongoUrl = this.getEnvironmentVar('MONGO_URL', 'mongodb://test-mongo:27017/auth')
     this.appDb = this.getEnvironmentVar('MONGO_DATABASE', 'corp-hq')
 }
 
