@@ -16,6 +16,8 @@ namespace Runner
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
     using RabbitMQ.Client.Exceptions;
+    using RedLockNet.SERedis;
+    using Runner.Data;
     using Runner.Jobs;
     using Runner.Model;
 
@@ -28,6 +30,7 @@ namespace Runner
         private static Monitor instance = null;
         private static IConnectionFactory connectionFactory;
         private static IDbFactory dbFactory;
+        private static RedLockFactory redLockFactory;
         private IModel channel;
         private IConnection connection;
         private bool isDisposed = false; // To detect redundant calls
@@ -38,6 +41,8 @@ namespace Runner
         internal Monitor()
         {
         }
+
+        internal event EventHandler Disposed;
 
         /// <summary>
         /// Gets the monitor instance.
@@ -63,10 +68,12 @@ namespace Runner
         /// </summary>
         /// <param name="connectionFactory">The RabbitMQ connection factory</param>
         /// <param name="dbFactory">The database factory</param>
-        public static void Initialize(IConnectionFactory connectionFactory, IDbFactory dbFactory)
+        /// <param name="redLockFactory">The redis lock factory</param>
+        public static void Initialize(IConnectionFactory connectionFactory, IDbFactory dbFactory, RedLockFactory redLockFactory)
         {
             Monitor.connectionFactory = connectionFactory;
             Monitor.dbFactory = dbFactory;
+            Monitor.redLockFactory = redLockFactory;
         }
 
         /// <summary>
@@ -74,10 +81,10 @@ namespace Runner
         /// </summary>
         public void Start()
         {
-            var settingsCollection = dbFactory.GetCollection<Common.Model.Setting<Common.Model.RabbitMQ.Root>>(CollectionNames.Settings);
-            var settings = settingsCollection.AsQueryable().Where(s => s.Key == "rabbitConnection").First().Value;
+            var settingRepo = (ISettingRepository)Bootstrap.ServiceProvider.GetService(typeof(ISettingRepository));
+            var rabbitSettings = settingRepo.FetchSetting<Common.Model.RabbitMQ.Root>("rabbitConnection");
 
-            this.ConnectToMessageQueue(settings);
+            this.ConnectToMessageQueue(rabbitSettings);
 
             this.channel = this.connection.CreateModel();
             this.channel.BasicQos(0, 1, false);
@@ -95,7 +102,7 @@ namespace Runner
 
             // Add ourself to the runner collection
             var col = dbFactory.GetCollection<TaskRunner>(CollectionNames.Runners);
-            col.InsertOne(new TaskRunner { Name = this.controlQueueName, ExpireAt = DateTime.Now.AddMinutes(settings.RecordTtl) });
+            col.InsertOne(new TaskRunner { Name = this.controlQueueName, ExpireAt = DateTime.Now.AddMinutes(rabbitSettings.RecordTtl) });
 
             // Setup heartbeat
             var t = Task.Run(() =>
@@ -105,9 +112,9 @@ namespace Runner
                     // Since we want to do a partial update we have to use the builder
                     col.UpdateOne(
                         r => r.Name == this.controlQueueName,
-                        Builders<TaskRunner>.Update.Set("expireAt", DateTime.Now.AddMinutes(settings.RecordTtl)));
+                        Builders<TaskRunner>.Update.Set("expireAt", DateTime.Now.AddMinutes(rabbitSettings.RecordTtl)));
 
-                    Thread.Sleep(1000 * 60 * settings.RecordHeartbeatInterval);
+                    Thread.Sleep(1000 * 60 * rabbitSettings.RecordHeartbeatInterval);
                 }
             });
 
@@ -154,10 +161,17 @@ namespace Runner
                     // Clean up managed resources here
                     this.connection.Dispose();
                     this.channel.Dispose();
+
+                    // HACK: Need to move this.
+                    Monitor.redLockFactory.Dispose();
                 }
 
                 // Clean up any unmanaged resources here.
                 this.isDisposed = true;
+                if (this.Disposed != null)
+                {
+                    this.Disposed(this, new EventArgs());
+                }
             }
         }
 

@@ -12,6 +12,15 @@ build-runner:  ## Builds the API displaying any analytics violations.
 build-runner-tests:  ## Builds the API tests.
 	dotnet build --no-incremental ./tests/unit/runnertest
 
+cover-all-unit-tests:  ## Runs the unit tests with coverage enabled.
+	dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov .
+
+cover-api-tests:  ## Runs the runner tests and displays coverage results.
+	dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov ./tests/unit/apitest/apitest.csproj
+
+cover-runner-tests:  ## Runs the runner tests and displays coverage results.
+	dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov ./tests/unit/runnertest/runnertest.csproj
+
 docker-build-api: publish-api  ## Runs the docker build for the corp-hq api project
 	docker build --no-cache -t corp-hq-api ./app/api
 
@@ -31,6 +40,9 @@ publish-api:  ## Publishes the API displaying any analytics violations.
 
 publish-runner:  ## Publishes the runner displaying any analytics violations.
 	dotnet publish --configuration Release ./app/runner
+
+quickstart-cleanup:  ## Cleans up resources started by the quickstart process.
+	docker-compose -f quickstart-compose.yml down -v
 
 run-api: build-api  ## Builds the API then runs it.
 	MONGO_CONNECTION=mongodb://mongoUser:mongoPass@127.0.0.1:27017/auth dotnet run -p ./app/api

@@ -27,7 +27,7 @@ docker-compose -f test-compose.yml build
 echo "-----------"
 echo "Start the db and dependencies."
 echo "-----------"
-docker-compose -f test-compose.yml up -d test-mongodb test-rabbitmq test-eve-api
+docker-compose -f test-compose.yml up -d test-mongodb test-rabbitmq test-eve-api test-redis
 
 echo "-----------"
 echo "Sleeping $CORPHQ_BEHAVE_SLEEP seconds then seed the db with test data."

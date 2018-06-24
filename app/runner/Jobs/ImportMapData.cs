@@ -13,6 +13,7 @@ namespace Runner.Jobs
     using MongoDB.Driver;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Runner.Data;
 
     /// <summary>
     /// Job for creating the mongo indexes
@@ -24,12 +25,16 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportMapData"/> class.
         /// </summary>
-        /// <param name="jobSpec">The job specification this is running for.</param>
-        /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public ImportMapData(JobSpecLite jobSpec, IDbFactory dbFactory)
-            : base(jobSpec, dbFactory)
+        /// <param name="jobRepository">The job repository used to persist information relating to this job.</param>
+        /// <param name="settingRepository">The setting repository used to acquire setting information.</param>
+        /// <param name="mapRepository">The map repository used to acquire and persist eve map information.</param>
+        public ImportMapData(IJobRepository jobRepository, ISettingRepository settingRepository, IMapRepository mapRepository)
+            : base(jobRepository, settingRepository)
         {
+            this.MapRepository = mapRepository;
         }
+
+        private IMapRepository MapRepository { get; set; }
 
         /// <summary>
         /// The main body for the job being run.
@@ -50,7 +55,6 @@ namespace Runner.Jobs
             var result = Client.GetWithReties(uri);
             var regions = JsonConvert.DeserializeObject<List<int>>(result);
 
-            var regionCol = this.DbFactory.GetCollection<Region>(CollectionNames.Regions);
             foreach (var regionId in regions)
             {
                 this.AddMessage("Fetching data for region: {0}.", regionId);
@@ -66,12 +70,7 @@ namespace Runner.Jobs
                     ConstellationIds = regionDetails.ConstellationIds
                 };
 
-                var filterCondition = Builders<Region>.Filter.Eq(r => r.RegionId, regionId);
-                var updateCondition = Builders<Region>.Update.Set(r => r.RegionId, regionId)
-                                                             .Set(r => r.Name, regionDetails.Name)
-                                                             .Set(r => r.ConstellationIds, regionDetails.ConstellationIds);
-
-                regionCol.UpdateOne(filterCondition, updateCondition, new UpdateOptions { IsUpsert = true });
+                this.MapRepository.SaveRegion(regionData);
             }
 
             this.AddMessage("Finished importing region data.");

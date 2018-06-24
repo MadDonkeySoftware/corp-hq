@@ -11,24 +11,20 @@ namespace Runner.Jobs
     using Common.Model;
     using Microsoft.Extensions.Logging;
     using MongoDB.Driver;
+    using Runner.Data;
 
     /// <summary>
     /// Base Job class
     /// </summary>
     public abstract class Job : IJob
     {
-        private IMongoCollection<JobMessage> messageCollection;
-        private IMongoCollection<JobSpec<dynamic>> jobSpecCollection;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Job"/> class.
         /// </summary>
-        /// <param name="jobSpec">The job specification this is running for.</param>
-        /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public Job(JobSpecLite jobSpec, IDbFactory dbFactory)
+        /// <param name="jobRepository">The job repository used to persist information relating to this job.</param>
+        public Job(IJobRepository jobRepository)
         {
-            this.JobSpec = jobSpec;
-            this.DbFactory = dbFactory;
+            this.JobRepository = jobRepository;
             this.Messages = new List<string>();
         }
 
@@ -36,13 +32,13 @@ namespace Runner.Jobs
         /// Gets the internal job specification for this job.
         /// </summary>
         /// <returns>The job UUID.</returns>
-        protected internal JobSpecLite JobSpec { get; private set; }
+        public JobSpecLite JobSpec { get; internal set; }
 
         /// <summary>
-        /// Gets the configured db factory.
+        /// Gets the configured job repository.
         /// </summary>
-        /// <returns>The db factory.</returns>
-        protected IDbFactory DbFactory { get; private set; }
+        /// <returns>The job repository.</returns>
+        protected IJobRepository JobRepository { get; private set; }
 
         /// <summary>
         /// Gets the list of all messages associated with this job.
@@ -54,19 +50,20 @@ namespace Runner.Jobs
         /// </summary>
         public void Start()
         {
+            if (this.JobSpec == null)
+            {
+                throw new NullReferenceException("JobSpec");
+            }
+
             try
             {
-                this.messageCollection = this.DbFactory.GetCollection<JobMessage>(CollectionNames.JobMessages);
-                this.jobSpecCollection = this.DbFactory.GetCollection<JobSpec<dynamic>>(CollectionNames.Jobs);
                 this.Initialize();
                 this.Work();
                 this.Conclude();
             }
             catch (Exception ex)
             {
-                this.jobSpecCollection.UpdateOne(
-                    Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobSpec.Uuid),
-                    Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Failed).Set(j => j.EndTimestamp, DateTime.Now));
+                this.JobRepository.UpdateStatusAndEndTimestamp(this.JobSpec, JobStatuses.Failed, DateTime.Now);
                 this.DumpException(ex);
             }
         }
@@ -76,9 +73,7 @@ namespace Runner.Jobs
         /// </summary>
         protected internal virtual void Initialize()
         {
-            this.jobSpecCollection.UpdateOne(
-                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobSpec.Uuid),
-                Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Running).Set(j => j.StartTimestamp, DateTime.Now));
+            this.JobRepository.UpdateStatusAndStartTimestamp(this.JobSpec, JobStatuses.Running, DateTime.Now);
         }
 
         /// <summary>
@@ -86,9 +81,7 @@ namespace Runner.Jobs
         /// </summary>
         protected internal virtual void Conclude()
         {
-            this.jobSpecCollection.UpdateOne(
-                Builders<JobSpec<dynamic>>.Filter.Eq(j => j.Uuid, this.JobSpec.Uuid),
-                Builders<JobSpec<dynamic>>.Update.Set(j => j.Status, JobStatuses.Successful).Set(j => j.EndTimestamp, DateTime.Now));
+            this.JobRepository.UpdateStatusAndEndTimestamp(this.JobSpec, JobStatuses.Successful, DateTime.Now);
         }
 
         /// <summary>
@@ -99,19 +92,11 @@ namespace Runner.Jobs
         /// <param name="args">The message args to associate with the job.</param>
         protected internal void AddMessage(JobMessageLevel level, string format, params object[] args)
         {
-            // TODO: Make Job Message expirary configurable via the settings db.
+            // TODO: Make Job Message expiry configurable via the settings db.
             var message = string.Format(CultureInfo.CurrentCulture, format, args);
             Console.WriteLine(message, args);
             this.Messages.Add(message);
-            this.messageCollection.InsertOneAsync(new JobMessage
-            {
-                JobUuid = this.JobSpec.Uuid,
-                MasterJobUuid = this.JobSpec.MasterUuid,
-                ExpireAt = DateTime.Now.AddDays(3),
-                Timestamp = DateTime.Now,
-                Level = (ushort)level,
-                Message = message
-            });
+            this.JobRepository.AddMessageToJob(this.JobSpec, level, message);
         }
 
         /// <summary>
@@ -163,17 +148,16 @@ namespace Runner.Jobs
     [SuppressMessage(
         "StyleCop.CSharp.MaintainabilityRules",
         "SA1402:FileMayOnlyContainASingleType",
-        Justification = "No way to resolve this issue as rules confict with one another.")]
+        Justification = "No way to resolve this issue as rules conflict with one another.")]
     public abstract class Job<T> : Job, IJob<T>
         where T : class
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Job{T}"/> class.
         /// </summary>
-        /// <param name="jobSpec">The job specification this is running for.</param>
-        /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public Job(JobSpecLite jobSpec, IDbFactory dbFactory)
-            : base(jobSpec, dbFactory)
+        /// <param name="jobRepository">The job repository used to persist information relating to this job.</param>
+        public Job(IJobRepository jobRepository)
+            : base(jobRepository)
         {
         }
 

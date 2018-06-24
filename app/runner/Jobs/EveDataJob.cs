@@ -14,6 +14,7 @@ namespace Runner.Jobs
     using MongoDB.Driver;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Runner.Data;
 
     /// <summary>
     /// Job for creating the mongo indexes
@@ -25,12 +26,19 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="EveDataJob"/> class.
         /// </summary>
-        /// <param name="jobSpec">The job specification this is running for.</param>
-        /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public EveDataJob(JobSpecLite jobSpec, IDbFactory dbFactory)
-            : base(jobSpec, dbFactory)
+        /// <param name="jobRepository">The job repository used to persist information relating to this job.</param>
+        /// <param name="settingRepository">The setting repository used to acquire setting information.</param>
+        public EveDataJob(IJobRepository jobRepository, ISettingRepository settingRepository)
+            : base(jobRepository)
         {
+            this.SettingRepository = settingRepository;
         }
+
+        /// <summary>
+        /// Gets the configured job repository.
+        /// </summary>
+        /// <returns>The job repository.</returns>
+        protected ISettingRepository SettingRepository { get; private set; }
 
         /// <summary>
         /// Creates a standardized URI for the configured EVE data endpoint.
@@ -41,9 +49,8 @@ namespace Runner.Jobs
         {
             if (baseEveDataEndpoint == null)
             {
-                var setting = this.DbFactory.GetCollectionAsQueryable<Common.Model.Setting<string>>(
-                    CollectionNames.Settings).First(x => x.Key == "eveDataUri");
-                baseEveDataEndpoint = new Uri(setting.Value.EndsWith("/", StringComparison.InvariantCulture) ? setting.Value : setting.Value + "/");
+                var setting = this.SettingRepository.FetchSetting<string>("eveDataUri");
+                baseEveDataEndpoint = new Uri(setting.EndsWith("/", StringComparison.InvariantCulture) ? setting : setting + "/");
             }
 
             if (part.StartsWith("/", System.StringComparison.InvariantCulture))

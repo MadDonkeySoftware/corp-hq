@@ -7,6 +7,7 @@ namespace Runner.Jobs
     using Common.Data;
     using Common.Model;
     using MongoDB.Driver;
+    using Runner.Data;
 
     /// <summary>
     /// Job for creating the mongo indexes
@@ -16,12 +17,15 @@ namespace Runner.Jobs
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateMongoIndexes"/> class.
         /// </summary>
-        /// <param name="jobSpec">The job specification this is running for.</param>
+        /// <param name="jobRepository">The job repository used to persist information relating to this job.</param>
         /// <param name="dbFactory">The dbFactory for this job to use.</param>
-        public CreateMongoIndexes(JobSpecLite jobSpec, IDbFactory dbFactory)
-            : base(jobSpec, dbFactory)
+        public CreateMongoIndexes(IJobRepository jobRepository, IDbFactory dbFactory)
+            : base(jobRepository)
         {
+            this.DbFactory = dbFactory;
         }
+
+        private IDbFactory DbFactory { get; set; }
 
         /// <summary>
         /// The main body for the job being run.
@@ -39,40 +43,37 @@ namespace Runner.Jobs
         private void CreateRunnersIndexes()
         {
             var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.Runners);
-            col.Indexes.CreateOne(
-                Builders<dynamic>.IndexKeys.Ascending("expireAt"),
-                new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
+            this.CreateExpireAtIndex<dynamic>(col);
         }
 
         private void CreateJobsIndexes()
         {
             var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.Jobs);
-            col.Indexes.CreateOne(
-                Builders<dynamic>.IndexKeys.Ascending("expireAt"),
-                new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
+            this.CreateExpireAtIndex<dynamic>(col);
         }
 
         private void CreateJobMessagesIndexes()
         {
             var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.JobMessages);
-            col.Indexes.CreateOne(
-                Builders<dynamic>.IndexKeys.Ascending("expireAt"),
-                new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
+            this.CreateExpireAtIndex<dynamic>(col);
         }
 
         private void CreateMarketOrdersIndexes()
         {
             var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.MarketOrders);
-            col.Indexes.CreateOne(
-                Builders<dynamic>.IndexKeys.Ascending("expireAt"),
-                new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
+            this.CreateExpireAtIndex<dynamic>(col);
         }
 
         private void CreateSessionIndexes()
         {
             var col = this.DbFactory.GetCollection<dynamic>(CollectionNames.Sessions);
-            col.Indexes.CreateOne(
-                Builders<dynamic>.IndexKeys.Ascending("expireAt"),
+            this.CreateExpireAtIndex<dynamic>(col);
+        }
+
+        private void CreateExpireAtIndex<T>(IMongoCollection<T> collection)
+        {
+            collection.Indexes.CreateOne(
+                Builders<T>.IndexKeys.Ascending("expireAt"),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) });
         }
     }

@@ -116,8 +116,8 @@ namespace ApiTests.Controllers
                 }.AsQueryable(),
                 new List<JobMessage>
                 {
-                    new JobMessage { JobUuid = "1", Message = "Test Message 2", Timestamp = testTimestamp },
-                    new JobMessage { JobUuid = "1", Message = "Test Message", Timestamp = testTimestamp.AddSeconds(-1) }
+                    new JobMessage { JobUuid = "1", MasterJobUuid = "1", Level = (ushort)JobMessageLevel.Info, Message = "Test Message 2", Timestamp = testTimestamp },
+                    new JobMessage { JobUuid = "1", MasterJobUuid = "1", Level = (ushort)JobMessageLevel.Info, Message = "Test Message", Timestamp = testTimestamp.AddSeconds(-1) }
                 }.AsQueryable(),
                 200,
                 expected
@@ -231,12 +231,8 @@ namespace ApiTests.Controllers
         {
             // Arrange
             var mockCollection = new Mock<IMongoCollection<JobSpec<string>>>();
-            var mockRabbitConnection = new Mock<IConnection>();
-            var mockRabbitChannel = new Mock<IModel>();
 
             this.dbFactoryMock.Setup(x => x.GetCollection<JobSpec<string>>(CollectionNames.Jobs, null, null)).Returns(mockCollection.Object);
-            this.connectionFactoryMock.Setup(x => x.CreateConfiguredConnection()).Returns(mockRabbitConnection.Object);
-            mockRabbitConnection.Setup(x => x.CreateModel()).Returns(mockRabbitChannel.Object);
 
             // Act
             var result = (ObjectResult)this.Controller.Post(job);
@@ -244,10 +240,6 @@ namespace ApiTests.Controllers
 
             // Assert
             Assert.Equal(expectedStatus, result.StatusCode);
-            if (result.StatusCode < 300)
-            {
-                mockRabbitChannel.Verify(x => x.BasicPublish(string.Empty, "jobs", false, null, It.IsAny<byte[]>()));
-            }
         }
     }
 }
