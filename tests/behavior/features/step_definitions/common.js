@@ -2,9 +2,15 @@ const {Given, When, Then} = require('cucumber')
 const assert = require('assert')
 
 Given('wait for {int} seconds', function (delay) {
-    this.sleep(parseFloat(delay * 1000))
+    return new Promise((resolve) => {
+        this.sleep(parseFloat(delay * 1000))
+        resolve()
+    })
 })
 
 Then('the response code is {int}', function(code) {
-    assert.equal(code, this.respCode)
+    return new Promise((resolve) => {
+        assert.equal(code, this.respCode)
+        resolve()
+    })
 })

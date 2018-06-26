@@ -7,5 +7,5 @@ Feature: Map data
     And I already have an auth token expiring in 10 seconds
     When I query the list region endpoint
     Then the response code is 200
-    And I recieve 10 regions
+    And I receive 10 regions
     And the region id and name are present

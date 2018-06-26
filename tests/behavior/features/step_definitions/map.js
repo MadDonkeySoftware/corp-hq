@@ -22,82 +22,91 @@ let requestDataMap = {
     "import market data": importMapDataBodyBuilder,
 }
 
-Given('there are {int} regions in the database', function (total, callback) {
+Given('there are {int} regions in the database', function (total) {
     // Write code here that turns the phrase above into concrete actions
     let test = this
-    MongoClient.connect(test.mongoUrl, function(err, db) {
-        try{
-            if (err) callback(err)
-            let dbo = db.db(test.appDb)
-            let dbc = dbo.collection('regions')
-            let query = { }
-            let baseRegionId = 1000000
-            let items = []
+    return new Promise((resolve, reject) => {
+        MongoClient.connect(test.mongoUrl, function(err, db) {
+            try{
+                if (err) reject(err)
+                let dbo = db.db(test.appDb)
+                let dbc = dbo.collection('regions')
+                let query = { }
+                let baseRegionId = 1000000
+                let items = []
 
-            // clear the collection
-            dbc.deleteMany(query)
+                // clear the collection
+                dbc.deleteMany(query)
 
-            for(let i = 0; i < total; i++){
-                items.push(
-                    {
-                        "regionId": baseRegionId + i,
-                        "name": "Region-" + (baseRegionId + i)
-                    }
-                )
+                for(let i = 0; i < total; i++){
+                    items.push(
+                        {
+                            "regionId": baseRegionId + i,
+                            "name": "Region-" + (baseRegionId + i)
+                        }
+                    )
+                }
+
+                dbc.insertMany(items)
+                resolve()
             }
+            catch(err){
+                reject(err)
+            }
+            finally{
+                db.close()
+            }
+        })
+    })
+})
 
-            dbc.insertMany(items)
-            callback()
-        }
-        catch(err){
-            callback(err);
-        }
-        finally{
-            db.close()
-        }
-    });
-});
-
-
-When('I query the list region endpoint', function (callback) {
+When('I query the list region endpoint', function () {
     let test = this
-    let args = {
-        method: 'GET',
-        uri: this.v1Url('map/regions'),
-        headers: {
-            'auth-token': test.token
-        },
-        json: true
-    }
-
-    request(args, (err, response, body) => {
-        if (err) {
-            callback(err);
-        } else {
-            test.respCode = response.statusCode;
-            test.respBody = body;
-            callback();
+    return new Promise((resolve, reject) => {
+        let args = {
+            method: 'GET',
+            uri: this.v1Url('map/regions'),
+            headers: {
+                'auth-token': test.token
+            },
+            json: true
         }
-    });
-});
 
-Then('I recieve {int} regions', function (expectedRegionsCount) {
-    // Write code here that turns the phrase above into concrete actions
-    let regions = this.respBody['data']
-    assert.equal(expectedRegionsCount, regions.length)
-});
+        request(args, (err, response, body) => {
+            if (err) {
+                reject(err)
+            } else {
+                test.respCode = response.statusCode
+                test.respBody = body
+                resolve()
+            }
+        })
+    })
+})
+
+Then('I receive {int} regions', function (expectedRegionsCount) {
+    let test = this
+    return new Promise((resolve) => {
+        let regions = test.respBody['data']
+        assert.equal(expectedRegionsCount, regions.length)
+        resolve()
+    })
+})
 
 Then('the region id and name are present', function () {
-    // Write code here that turns the phrase above into concrete actions
-    let regions = this.respBody['data']
-    regions.forEach(function(element) {
-        if (!("name" in element)) {
-            console.debug(element)
-            assert.fail("Name not found in result set.")
-        }
-        if (!("id" in element)) {
-            console.debug(element)
-            assert.fail("Id not found in result set.")
-        }
-    });
-});
+    let test = this
+    return new Promise((resolve) => {
+        let regions = test.respBody['data']
+        regions.forEach(function(element) {
+            if (!("name" in element)) {
+                console.debug(element)
+                assert.fail("Name not found in result set.")
+            }
+            if (!("id" in element)) {
+                console.debug(element)
+                assert.fail("Id not found in result set.")
+            }
+        })
+        resolve()
+    })
+})
