@@ -12,7 +12,7 @@ Feature: Tokens
     Given I already have an auth token expiring in 10 seconds
     When I refresh the token with the system
     Then the response code is 204
-    And the session for my token has an updated exipration timestamp
+    And the session for my token has an updated expiration timestamp
 
   # I'm not sure we can test this since the mongo cleanup runs similarly to dotnet GC.
   @ignore

@@ -49,14 +49,14 @@ function CustomWorld() {
      *   The milliseconds to sleep
      */
     this.sleep = function (ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     this.getEnvironmentVar = getEnvironmentVar
 
     /**
      * Polls the database invoking the completed callback when the job has been detected as complete or when the
-     * timeout has ellapsed
+     * timeout has elapsed
      *
      * @param {string} jobUuid
      *   The job uuid in the database that is checked for completing.
@@ -66,56 +66,56 @@ function CustomWorld() {
      *     param {object} test - a reference to the test object.
      *     param {object} job - a reference to the job object loaded from the database.
      *     param {function} callback - a reference to the cucumber callback used to signal this test is complete.
-     * @param {function} callback
-     *   A reference to the cucumber callback used to signal this test is complete
      * @param {int} timeout
-     *   The maximum amount of time to wait for a job to complete. When the timeout has ellapsed the current state of the job will be returned.
+     *   The maximum amount of time to wait for a job to complete. When the timeout has elapsed the current state of the job will be returned.
      */
-    this.waitForJobToComplete = function (jobUuid, completed, callback, timeout = 30000) {
+    this.waitForJobToComplete = function (jobUuid, timeout = 30000) {
         let timeoutTs = new Date().getTime() + timeout
 
-        let work = function (callback) {
-            try {
-                MongoClient.connect(parent.mongoUrl, function(err, db) {
-                    try{
-                        if (err) callback(err)
-                        let dbo = db.db(parent.appDb)
-                        let dbc = dbo.collection('jobs')
-                        let query = { uuid: jobUuid }
+        return new Promise((resolve, reject) => {
+            let work = function () {
+                try {
+                    MongoClient.connect(parent.mongoUrl, function(err, db) {
+                        try{
+                            if (err) reject(err)
+                            let dbo = db.db(parent.appDb)
+                            let dbc = dbo.collection('jobs')
+                            let query = { uuid: jobUuid }
 
-                        // NOTE: We have to sleep here so Mongo's eventual consistency has the new job available for reading.
-                        parent.sleep(1000)
-                        let job = dbc.find(query).toArray(function(err, result){
-                            if (err) throw err;
-                            if (result.length != 1) {
-                                throw "More than one job found for job id: " + jobUuid
-                            }
+                            dbc.find(query).toArray(function(err, result){
+                                if (err) throw err;
+                                if (result.length != 1) {
+                                    throw "More than one job found for job id: " + jobUuid
+                                }
 
-                            let item = result[0];
-                            var awaitStatus = ['Successful', 'Failed']
-                            if (new Date().getTime() > timeoutTs){
-                                completed(item, callback)
-                            } else if (awaitStatus.indexOf(item['status']) > -1) {
-                                completed(item, callback)
-                            } else {
-                                work(callback)
-                            }
-                        })
-                    }
-                    catch(err){
-                        callback(err);
-                    }
-                    finally{
-                        db.close()
-                    }
-                });
+                                let item = result[0];
+                                var awaitStatus = ['Successful', 'Failed']
+                                if (new Date().getTime() > timeoutTs){
+                                    resolve(item)
+                                } else if (awaitStatus.indexOf(item['status']) > -1) {
+                                    resolve(item)
+                                } else {
+                                    // NOTE: We have to sleep here so Mongo's eventual consistency has the
+                                    // new job available for reading.
+                                    parent.sleep(1000).then(() => work())
+                                }
+                            })
+                        }
+                        catch(err){
+                            reject(err);
+                        }
+                        finally{
+                            db.close()
+                        }
+                    });
+                }
+                catch(err){
+                    reject(err);
+                }
             }
-            catch(err){
-                callback(err);
-            }
-        }
 
-        work(callback)
+            work()
+        })
     }
 
     this.rootUrl = this.getEnvironmentVar('API_URL', 'http://test-api:5000')
